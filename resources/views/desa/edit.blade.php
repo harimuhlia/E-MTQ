@@ -1,42 +1,46 @@
 @extends('layouts.app')
+@section('title', 'Edit Data Jurusan')
 
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between justify-align-center">
-                    <div>
-                        Edit Desa - {{ $desa->nama_desa }}
-                    </div>
-                    <div>
-                        <a href="{{ route('desa.index') }}" class="btn btn-primary">Back</a>
-                    </div>
-                </div>
+<section class="content">
+<div class="container-fluid">
+  <div class="row">
+  <div class="col-md-12">
+  <div class="card card-primary">
+  <div class="card-header">
+  <h3 class="card-title">Formulir Edit Data Desa</h3>
+  </div>
 
-                <div class="card-body">
-                    <form action="{{ route('desa.update', $desa->id) }}" method="post">
-                        @csrf
-                        @method('put')
-                        <div class="row mb-3">
-                            <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Nama Desa') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="email" type="text" class="form-control @error('email') is-invalid @enderror" value="{{ $desa->nama_desa }}" name="nama_desa" value="{{ old('nama_desa') }}" required autofocus>
-                            </div>
-                        </div>
-
-                        <div class="row mb-0">
-                            <div class="col-md-8 offset-md-4">
-                                <button type="submit" class="btn btn-primary">
-                                    {{ __('Submit') }}
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
+@if ($errors->any())
+  <div class="alert alert-danger">
+      <strong>Whoops!</strong> There were some problems with your input.<br><br>
+      <ul>
+          @foreach ($errors->all() as $error)
+              <li>{{ $error }}</li>
+          @endforeach
+      </ul>
+  </div>
+@endif
+<form action="{{ route('desa.update', $desa->id)}}" enctype="multipart/form-data" method="POST">
+  @csrf
+  @method('put')
+<form>
+  <div class="card-body">
+      <div class="form-group">
+        <label for="nama_jurusan">Edit Desa</label>
+        <input type="text" class="form-control" name="nama_desa" value="{{ $desa->nama_desa }}">
+      </div>
+  <div class="card-footer">
+  <button type="submit" class="btn btn-primary">Submit</button>
+  <a class="btn btn-success" href="{{ route('desa.index')}}">Kembali</a>
+  </div>
+  </form>
+            <!-- /.card -->
+          </div>
+          <!-- /.col -->
         </div>
-    </div>
-</div>
+        <!-- /.row -->
+      </div>
+      <!-- /.container-fluid -->
+</section>
 @endsection
