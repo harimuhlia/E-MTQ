@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Nomor Cabang')
+@section('title', 'Nomor Golongan')
     
 @section('content')
 <section class="content">
@@ -20,7 +20,7 @@
                 <thead>
                 <tr>
                   <th>#</th>
-                  <th>Kode Golongan</th>
+                  <th>Nomor Cabang</th>
                   <th>Nama Golongan</th>
                   <th>Edit</th>
                 </tr>
@@ -29,7 +29,7 @@
                   @foreach ($golongans as $item)
                   <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $item->kode_golongan }}</td>
+                    <td>{{ $item->nomorcabang_id }}</td>
                     <td>{{ $item->nama_golongan }}</td>
                     <td>
                       {{-- <a href="#" class="btn btn-primary btn-xs"><i class="fas fa-eye"></i></a>
@@ -50,7 +50,7 @@
                 <tfoot>
                 <tr>
                     <th>#</th>
-                    <th>Kode Golongan</th>
+                    <th>Nomor Cabang</th>
                     <th>Nama Golongan</th>
                     <th>Edit</th>
                 </tr>

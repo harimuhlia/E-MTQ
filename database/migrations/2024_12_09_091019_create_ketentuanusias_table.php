@@ -15,10 +15,10 @@ return new class extends Migration
     {
         Schema::create('ketentuanusias', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_cabang');
-            $table->string('nama_golongan');
-            $table->date('usia_minimal');
-            $table->date('usia_maksimal');
+            $table->string('nama_cabang')->nullable();
+            $table->string('nama_golongan')->nullable();
+            $table->date('usia_minimal')->nullable();
+            $table->date('usia_maksimal')->nullable();
             $table->timestamps();
         });
     }

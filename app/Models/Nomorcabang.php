@@ -14,4 +14,9 @@ class Nomorcabang extends Model
     {
         return strtolower(str_replace(' ', '-', $nama_cabang));
     }
+
+    public function golongans()
+    {
+        return $this->hasMany(Golongan::class);
+    }
 }

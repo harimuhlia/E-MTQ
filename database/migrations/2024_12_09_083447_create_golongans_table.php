@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('golongans', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_golongan')->unique();
-            $table->string('nama_golongan')->unique();
+            $table->string('nama_golongan')->nullable();
+            $table->foreignId('nomorcabang_id')->constrained('nomorcabangs')->onDelete('cascade');
             $table->string('slug')->unique();
             $table->timestamps();
         });

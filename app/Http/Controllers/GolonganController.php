@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Golongan;
+use App\Models\Nomorcabang;
 use Illuminate\Http\Request;
 
 class GolonganController extends Controller
@@ -25,7 +26,8 @@ class GolonganController extends Controller
      */
     public function create()
     {
-        return view('golongan.create');
+        $nomorcabangs = Nomorcabang::all();
+        return view('golongan.create', compact('nomorcabangs'));
     }
 
     /**
@@ -37,15 +39,15 @@ class GolonganController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'kode_golongan' => 'required',
             'nama_golongan' => 'required',
+            'nomorcabang_id' => 'required',
         ]);
 
         $slug = Golongan::generateSlug($request->nama_golongan);
 
         Golongan::create([
-            'kode_golongan' => $request->kode_golongan,
             'nama_golongan' => $request->nama_golongan,
+            'nomorcabang_id' => $request->nomorcabang_id,
             'slug' => $slug,
         ]);
         return redirect()->route('golongan.index');
@@ -73,7 +75,8 @@ class GolonganController extends Controller
     public function edit($slug)
     {
         $golongans = Golongan::where('slug', $slug)->firstOrFail();
-        return view('golongan.edit', compact('golongans'));
+        $nomorcabangs = Nomorcabang::all();
+        return view('golongan.edit', compact('golongans', 'nomorcabangs'));
     }
 
     /**
@@ -86,16 +89,16 @@ class GolonganController extends Controller
     public function update(Request $request, $slug)
     {
         $request->validate([
-            'kode_golongan' => 'required',
             'nama_golongan' => 'required',
+            'nomorcabang_id' => 'required',
         ]);
 
         $golongans = Golongan::where('slug', $slug)->firstOrFail();
         $slug = Golongan::generateSlug($request->nama_golongan);
 
         $golongans->update([
-            'kode_golongan' => $request->kode_golongan,
             'nama_golongan' => $request->nama_golongan,
+            'nomorcabang_id' => $request->nomorcabang_id,
             'slug' => $slug,
         ]);
 

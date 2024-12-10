@@ -27,11 +27,16 @@
     <div class="card-body">
         <div class="form-group">
             <label for="kode_golongan">Kode Golongan</label>
-            <input type="text" class="form-control" name="kode_golongan" placeholder="Silakan Masukan Kode Golongan">
+            <select name="nomorcabang_id" id="nomorcabang_id" class="form-control" required>
+              <option value="">Pilih Cabang Lomba</option>
+              @foreach ($nomorcabangs as $cabangLomba)
+                  <option value="{{ $cabangLomba->id }}">{{ $cabangLomba->nama_cabang }}</option>
+              @endforeach
+          </select>
         </div>
         <div class="form-group">
             <label for="nama_golongan">Nama Golongan</label>
-            <input type="text" class="form-control" name="nama_golongan" placeholder="Silakan Masukan Nama Golongan">
+            <input type="text" class="form-control" name="nama_golongan" id="nama_golongan" placeholder="Silakan Masukan Nama Golongan">
         </div>
     <div class="card-footer">
     <button type="submit" class="btn btn-primary">Submit</button>
