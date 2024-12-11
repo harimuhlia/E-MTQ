@@ -15,8 +15,9 @@ class Golongan extends Model
         return strtolower(str_replace(' ', '-', $nama_golongan));
     }
 
-    public function nomorCabang()
+    public function nomorcabang()
     {
         return $this->belongsTo(Nomorcabang::class);
     }
+
 }

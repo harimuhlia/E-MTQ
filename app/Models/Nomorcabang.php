@@ -19,4 +19,5 @@ class Nomorcabang extends Model
     {
         return $this->hasMany(Golongan::class);
     }
+
 }

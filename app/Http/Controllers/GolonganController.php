@@ -15,8 +15,10 @@ class GolonganController extends Controller
      */
     public function index()
     {
-        $golongans = Golongan::all();
-        return view("golongan.index", compact('golongans'));
+        $golongans = Golongan::with('nomorcabang')->get();
+        return view('golongan.index', compact('golongans'));
+        // $golongans = Golongan::all();
+        // return view("golongan.index", compact('golongans'));
     }
 
     /**
