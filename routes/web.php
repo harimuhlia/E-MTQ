@@ -6,6 +6,7 @@ use App\Http\Controllers\KetentuanusiaController;
 use App\Http\Controllers\NomorcabangController;
 use App\Http\Controllers\PendaftaranController;
 use App\Http\Controllers\TahuneventController;
+use App\Models\Ketentuanusia;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 

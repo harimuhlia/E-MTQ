@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Golongan;
 use App\Models\Ketentuanusia;
+use App\Models\Nomorcabang;
 use Illuminate\Http\Request;
 
 class KetentuanusiaController extends Controller
@@ -25,7 +27,8 @@ class KetentuanusiaController extends Controller
      */
     public function create()
     {
-        return view('ketentuan_usia.create');
+        $nomorcabangs = Nomorcabang::all();
+        return view('ketentuan_usia.create', compact('nomorcabangs'));
     }
 
     /**

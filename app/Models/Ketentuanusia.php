@@ -10,6 +10,6 @@ class Ketentuanusia extends Model
     use HasFactory;
     protected $fillable = [
         'usia_minimal',
-        'usia_maksimal', 'nama_cabang', 'nama_golongan'
+        'usia_maksimal', 'nama_cabang', 'nama_golongan', 'nomorcabang_id'
     ];
 }

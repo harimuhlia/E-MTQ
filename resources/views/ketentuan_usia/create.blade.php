@@ -21,31 +21,36 @@
         </ul>
     </div>
   @endif
-  <form action="{{ route('ketentuanusia.store')}}" enctype="multipart/form-data" method="POST">
+  <form action="{{ route('ketentuanusia.store') }}" method="POST">
     @csrf
-  <form>
-    <div class="card-body">
-        <div class="form-group">
-            <label for="nama_cabang">Nama Cabang</label>
-            <input type="text" class="form-control" name="nama_cabang" placeholder="Silakan Masukan Nama Cabang">
-        </div>
-        <div class="form-group">
-            <label for="nama_golongan">Nama Golongan</label>
-            <input type="text" class="form-control" name="nama_golongan" placeholder="Silakan Masukan Nama Golongan">
-        </div>
-        <div class="form-group">
-            <label for="usia_minimal">Usia Minimal</label>
-            <input type="date" class="form-control" name="usia_minimal" placeholder="Silakan Masukan Usia Minimal">
-        </div>
-        <div class="form-group">
-            <label for="usia_maksimal">Usia Maksimal</label>
-            <input type="date" class="form-control" name="usia_maksimal" placeholder="Silakan Masukan Usia Maksimal">
-        </div>
-    <div class="card-footer">
-    <button type="submit" class="btn btn-primary">Submit</button>
-    <a class="btn btn-success" href="{{ route('ketentuanusia.index')}}">Kembali</a>
-    </div>
-    </form>
+  <div class="card-body">
+    <div class="form-group">
+        <label for="nama_cabang">Cabang Lomba</label>
+        <select name="nama_cabang" id="nomorcabang_id" class="form-control" required>
+            <option value="">Pilih Cabang Lomba</option>
+            @foreach ($nomorcabangs as $cabangLomba)
+                <option value="{{ $cabangLomba->id }}">{{ $cabangLomba->nama_cabang }}</option>
+            @endforeach
+        </select>
+                </div>
+                <div class="form-group">
+                    <label for="nama_golongan">Golongan</label>
+                    <select name="nama_golongan" id="golongan" class="form-control" required>
+                        <option value="">Pilih Golongan</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="usia_minimal">Usia Minimal</label>
+                    <input type="date" class="form-control" name="usia_minimal" placeholder="Silakan Masukan Usia Minimal">
+                </div>
+                <div class="form-group">
+                    <label for="usia_maksimal">Usia Maksimal</label>
+                    <input type="date" class="form-control" name="usia_maksimal" placeholder="Silakan Masukan Usia Maksimal">
+                </div>
+                <div class="card-footer">
+                <button type="submit" class="btn btn-primary">Submit</button>
+                <a class="btn btn-success" href="{{ route('ketentuanusia.index')}}">Kembali</a>
+                </form>
               <!-- /.card -->
             </div>
             <!-- /.col -->
@@ -54,4 +59,35 @@
         </div>
         <!-- /.container-fluid -->
 </section>
+
+@endsection
+
+@section('javascript')
+<script>
+// Ketika cabang lomba dipilih
+$('#nomorcabang_id').change(function () {
+  var cabangLombaId = $(this).val();
+  if (cabangLombaId) {
+      // Mengambil golongan berdasarkan cabang lomba yang dipilih
+      $.ajax({
+          url: '/golongan-by-cabang',
+          method: 'GET',
+          data: {
+              nomorcabang_id: cabangLombaId
+          },
+          success: function (response) {
+              var golonganSelect = $('#golongan');
+              golonganSelect.empty(); // Kosongkan pilihan golongan
+              golonganSelect.append('<option value="">Pilih Golongan</option>');
+              $.each(response, function (index, golongan) {
+                  golonganSelect.append('<option value="' + golongan.id + '">' + golongan.nama_golongan + '</option>');
+              });
+          }
+      });
+  } else {
+      $('#golongan').empty();
+      $('#golongan').append('<option value="">Pilih Golongan</option>');
+  }
+});
+</script>
 @endsection
