@@ -37,8 +37,8 @@ class NomorcabangController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'kode_cabang' => 'required',
-            'nama_cabang' => 'required',
+            'kode_cabang' => ['required', 'string', 'max:255', 'unique:nomorcabangs'],
+            'nama_cabang' => ['required', 'string', 'max:255', 'unique:nomorcabangs'],
         ]);
 
         $slug = Nomorcabang::generateSlug($request->nama_cabang);
@@ -85,8 +85,8 @@ class NomorcabangController extends Controller
     public function update(Request $request, $slug)
     {
         $request->validate([
-            'kode_cabang' => 'required',
-            'nama_cabang' => 'required',
+            'kode_cabang' => ['required', 'string', 'max:255', 'unique:nomorcabangs'],
+            'nama_cabang' => ['required', 'string', 'max:255', 'unique:nomorcabangs'],
         ]);
 
         $nomorcabangs = Nomorcabang::where('slug', $slug)->firstOrFail();

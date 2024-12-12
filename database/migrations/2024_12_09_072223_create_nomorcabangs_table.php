@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('nomorcabangs', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_cabang'); // nama cabang
-            $table->string('nama_cabang');
+            $table->string('kode_cabang')->unique(); // nama cabang
+            $table->string('nama_cabang')->unique();
             $table->string('slug')->unique();
             $table->timestamps();
         });

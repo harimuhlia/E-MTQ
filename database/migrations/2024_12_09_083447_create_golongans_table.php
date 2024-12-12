@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('nomorcabang_id'); // FK ke nomorcabang
             $table->foreign('nomorcabang_id')->references('id')->on('nomorcabangs')->onDelete('cascade');
-            $table->string('nama_golongan'); // nama golongan
+            $table->string('nama_golongan')->unique(); // nama golongan
             $table->string('slug')->unique();
             $table->timestamps();
         });

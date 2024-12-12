@@ -65,15 +65,15 @@
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="{{ route('golongan.index')}}" class="nav-link {{ (request()->is('golongan*')) ? 'active' : '' }}">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Golongan</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
                     <a href="{{ route('nomorcabang.index')}}" class="nav-link {{ (request()->is('nomorcabang*')) ? 'active' : '' }}">
                       <i class="far fa-circle nav-icon"></i>
                       <p>No. Cabang</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="{{ route('golongan.index')}}" class="nav-link {{ (request()->is('golongan*')) ? 'active' : '' }}">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>Golongan</p>
                     </a>
                   </li>
                   <li class="nav-item">

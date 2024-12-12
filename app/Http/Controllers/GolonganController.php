@@ -41,7 +41,7 @@ class GolonganController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_golongan' => 'required',
+            'nama_golongan' => ['required', 'string', 'max:255', 'unique:golongans'],
             'nomorcabang_id' => 'required',
         ]);
 
@@ -91,7 +91,7 @@ class GolonganController extends Controller
     public function update(Request $request, $slug)
     {
         $request->validate([
-            'nama_golongan' => 'required',
+            'nama_golongan' => ['required', 'string', 'max:255', 'unique:golongans'],
             'nomorcabang_id' => 'required',
         ]);
 
