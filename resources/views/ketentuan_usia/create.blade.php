@@ -25,18 +25,21 @@
     @csrf
   <div class="card-body">
     <div class="form-group">
-        <label for="nama_cabang">Cabang Lomba</label>
-        <select name="nama_cabang" id="nomorcabang_id" class="form-control" required>
+        <label for="nama_cabang_usia">Cabang Lomba</label>
+        <select name="nama_cabang_usia" id="nama_cabang_usia" class="form-control" required>
             <option value="">Pilih Cabang Lomba</option>
-            @foreach ($nomorcabangs as $cabangLomba)
-                <option value="{{ $cabangLomba->id }}">{{ $cabangLomba->nama_cabang }}</option>
+            @foreach ($cabangs as $cabang)
+                <option value="{{ $cabang->id }}">{{ $cabang->nama_cabang_usia }}</option>
             @endforeach
         </select>
                 </div>
                 <div class="form-group">
                     <label for="nama_golongan">Golongan</label>
-                    <select name="nama_golongan" id="golongan" class="form-control" required>
-                        <option value="">Pilih Golongan</option>
+                    <select name="nama_golongan" id="" class="form-control" required>
+                        <option value="">Pilih Cabang Lomba</option>
+                        @foreach ($golongans as $golongan)
+                            <option value="{{ $golongan->id }}">{{ $golongan->nama_golongan_usia }}</option>
+                        @endforeach
                     </select>
                 </div>
                 <div class="form-group">
@@ -60,34 +63,4 @@
         <!-- /.container-fluid -->
 </section>
 
-@endsection
-
-@section('javascript')
-<script>
-// Ketika cabang lomba dipilih
-$('#nomorcabang_id').change(function () {
-  var cabangLombaId = $(this).val();
-  if (cabangLombaId) {
-      // Mengambil golongan berdasarkan cabang lomba yang dipilih
-      $.ajax({
-          url: '/golongan-by-cabang',
-          method: 'GET',
-          data: {
-              nomorcabang_id: cabangLombaId
-          },
-          success: function (response) {
-              var golonganSelect = $('#golongan');
-              golonganSelect.empty(); // Kosongkan pilihan golongan
-              golonganSelect.append('<option value="">Pilih Golongan</option>');
-              $.each(response, function (index, golongan) {
-                  golonganSelect.append('<option value="' + golongan.id + '">' + golongan.nama_golongan + '</option>');
-              });
-          }
-      });
-  } else {
-      $('#golongan').empty();
-      $('#golongan').append('<option value="">Pilih Golongan</option>');
-  }
-});
-</script>
 @endsection
