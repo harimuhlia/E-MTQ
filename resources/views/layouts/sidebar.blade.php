@@ -43,8 +43,8 @@
                   </p>
                 </a>
               </li>
-              <li class="nav-item has-treeview {{ request()->is('tahunevent*') || request()->is('desa*') || request()->is('golongan*') || request()->is('nomorcabang*') || request()->is('ketentuanusia*') ? 'menu-open' : '' }}">
-                <a href="#" class="nav-link {{ request()->is('tahunevent*') || request()->is('desa*') || request()->is('golongan*') || request()->is('nomorcabang*') || request()->is('ketentuanusia*') ? 'active' : '' }}">
+              <li class="nav-item has-treeview {{ request()->is('tahunevent*') || request()->is('ketentuanusia*') || request()->is('desa*') || request()->is('golongan*') || request()->is('nomorcabang*') ? 'menu-open' : '' }}">
+                <a href="#" class="nav-link {{ request()->is('tahunevent*') || request()->is('desa*') || request()->is('ketentuanusia*') || request()->is('golongan*') || request()->is('nomorcabang*') ? 'active' : '' }}">
                   <i class="nav-icon far fa-id-card"></i>
                   <p>
                     Data Master

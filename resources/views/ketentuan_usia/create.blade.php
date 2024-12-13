@@ -26,21 +26,21 @@
   <div class="card-body">
     <div class="form-group">
         <label for="nama_cabang_usia">Cabang Lomba</label>
-        <select name="nama_cabang_usia" id="nama_cabang_usia" class="form-control" required>
-            <option value="">Pilih Cabang Lomba</option>
-            @foreach ($cabangs as $cabang)
-                <option value="{{ $cabang->id }}">{{ $cabang->nama_cabang_usia }}</option>
-            @endforeach
+        <select name="cabang_id" id="cabang_id" class="select2" required>
+          <option value="">Pilih Cabang</option>
+          @foreach ($cabangs as $cabang)
+              <option value="{{ $cabang->id }}">{{ $cabang->nama_cabang }}</option>
+          @endforeach
         </select>
                 </div>
                 <div class="form-group">
                     <label for="nama_golongan">Golongan</label>
-                    <select name="nama_golongan" id="" class="form-control" required>
-                        <option value="">Pilih Cabang Lomba</option>
-                        @foreach ($golongans as $golongan)
-                            <option value="{{ $golongan->id }}">{{ $golongan->nama_golongan_usia }}</option>
-                        @endforeach
-                    </select>
+                    <select name="golongan_id" id="golongan_id" class="select2" required>
+                      <option value="">Pilih Golongan</option>
+                      @foreach ($golongans as $golongan)
+                          <option value="{{ $golongan->id }}">{{ $golongan->nama_golongan }}</option>
+                      @endforeach
+                  </select>
                 </div>
                 <div class="form-group">
                     <label for="usia_minimal">Usia Minimal</label>

@@ -6,7 +6,6 @@ use App\Http\Controllers\KetentuanusiaController;
 use App\Http\Controllers\NomorcabangController;
 use App\Http\Controllers\PendaftaranController;
 use App\Http\Controllers\TahuneventController;
-use App\Models\Ketentuanusia;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -32,7 +31,7 @@ Route::resource("desa", DesaController::class)->middleware(['auth']);
 Route::resource("tahunevent", TahuneventController::class)->middleware('auth');
 Route::resource("nomorcabang", NomorcabangController::class)->middleware('auth');
 Route::resource("golongan", GolonganController::class)->middleware('auth');
-Route::resource("ketentuanusia", KetentuanusiaController::class)->middleware('auth');
+Route::resource('ketentuanusia', KetentuanusiaController::class)->middleware('auth');
 
 Route::get('pendaftaran/create', [PendaftaranController::class, 'create'])->name('pendaftaran.create')->middleware('auth');
 Route::post('pendaftaran', [PendaftaranController::class, 'store'])->name('pendaftaran.store')->middleware('auth');

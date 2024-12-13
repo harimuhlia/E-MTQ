@@ -20,4 +20,9 @@ class Golongan extends Model
         return $this->belongsTo(Nomorcabang::class);
     }
 
+    public function ketentuanusia()
+    {
+        return $this->hasMany(Ketentuanusia::class);
+    }
+
 }

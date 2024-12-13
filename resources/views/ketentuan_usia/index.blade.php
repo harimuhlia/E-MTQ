@@ -29,17 +29,17 @@
                 </tr>
                 </thead>
                 <tbody> 
-                  @foreach ($ketentuanusias as $item)
+                  @foreach ($ketentuanusias as $ketentuanusia)
                   <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $item->nama_cabang }}</td>
-                    <td>{{ $item->nama_golongan }}</td>
-                    <td>{{ $item->usia_minimal }}</td>
-                    <td>{{ $item->usia_maksimal }}</td>
+                    <td>{{ $ketentuanusia->cabang->nama_cabang }}</td>
+                    <td>{{ $ketentuanusia->golongan->nama_golongan }}</td>
+                    <td>{{ $ketentuanusia->usia_minimal }}</td>
+                    <td>{{ $ketentuanusia->usia_maksimal }}</td>
                     <td>
                         @php
-                            $minimal = \Carbon\Carbon::parse($item->usia_minimal);
-                            $maksimal = \Carbon\Carbon::parse($item->usia_maksimal);
+                            $minimal = \Carbon\Carbon::parse($ketentuanusia->usia_minimal);
+                            $maksimal = \Carbon\Carbon::parse($ketentuanusia->usia_maksimal);
 
                             $years = $minimal->diffInYears($maksimal);
                             $months = $minimal->diffInMonths($maksimal) % 12;
@@ -48,15 +48,13 @@
                         {{ $years }} Tahun, {{ $months }} Bulan, {{ $days }} Hari
                     </td>
                     <td>
-                      {{-- <a href="#" class="btn btn-primary btn-xs"><i class="fas fa-eye"></i></a>
-                      <a href="{{ route('datasiswa.edit',$item->id) }}" class="btn btn-warning btn-xs"><i class="fas fa-edit"></i></a> --}}
-                      <form action="{{ route('ketentuanusia.destroy', $item->id) }}" method="post">
+                      <form action="{{ route('ketentuanusia.destroy', $ketentuanusia->id) }}" method="post">
                         @csrf
                         @method('delete')
-                        <a href="{{ route('ketentuanusia.show', $item->id) }}" class="btn btn-primary btn-xs"><i class="fas fa-eye"></i></a>
-                        <a href="{{ route('ketentuanusia.edit', $item->id) }}" class="btn btn-warning btn-xs"><i class="fas fa-edit"></i></a>
+                        <a href="{{ route('ketentuanusia.show', $ketentuanusia->slug) }}" class="btn btn-primary btn-xs"><i class="fas fa-eye"></i></a>
+                        <a href="{{ route('ketentuanusia.edit', $ketentuanusia->slug) }}" class="btn btn-warning btn-xs"><i class="fas fa-edit"></i></a>
                         @if (Auth()->user()->role == 'admin_global')
-                        <button class="btn btn-danger btn-xs" onclick="return confirm('Are you sure you want to delete the record {{ $item->id }} ?')"><i class="fas fa-trash-alt"></i></button>
+                        <button class="btn btn-danger btn-xs" onclick="return confirm('Are you sure you want to delete the record {{ $ketentuanusia->id }} ?')"><i class="fas fa-trash-alt"></i></button>
                         @endif
                       </form>
                     </td>

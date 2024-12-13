@@ -20,4 +20,9 @@ class Nomorcabang extends Model
         return $this->hasMany(Golongan::class);
     }
 
+    public function ketentuanusia()
+    {
+        return $this->hasMany(Ketentuanusia::class);
+    }
+
 }
