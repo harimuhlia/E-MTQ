@@ -64,7 +64,7 @@
     </div>
     <!-- /.container-fluid -->
   </section>
-  {{-- @include('sweetalert::alert') --}}
+  @include('sweetalert::alert')
 @endsection
 
 @section('javascript')

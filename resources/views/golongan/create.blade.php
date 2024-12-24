@@ -23,7 +23,6 @@
   @endif
   <form action="{{ route('golongan.store')}}" enctype="multipart/form-data" method="POST">
     @csrf
-  <form>
     <div class="card-body">
         <div class="form-group">
             <label for="kode_golongan">Kode Golongan</label>
@@ -42,7 +41,7 @@
     <button type="submit" class="btn btn-primary">Submit</button>
     <a class="btn btn-success" href="{{ route('golongan.index')}}">Kembali</a>
     </div>
-    </form>
+  </form>
               <!-- /.card -->
             </div>
             <!-- /.col -->

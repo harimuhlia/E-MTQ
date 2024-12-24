@@ -47,7 +47,7 @@ class TahuneventController extends Controller
             'tahun_event' => $request->tahun_event,
             'slug' => $slug,
         ]);
-        return redirect()->route('tahunevent.index');
+        return redirect()->route('tahunevent.index')->with('success', 'Tahun Berhasil Ditambahkan');
     }
 
     /**

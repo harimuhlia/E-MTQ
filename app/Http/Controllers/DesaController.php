@@ -39,7 +39,7 @@ class DesaController extends Controller
     {
         Desa::create($request->all());
 
-        return redirect()->route('desa.index');
+        return redirect()->route('desa.index')->with('success', 'Desa Berhasil Ditambahkan');
     }
 
     /**
@@ -79,7 +79,7 @@ class DesaController extends Controller
     {
         Desa::find($id)->update($request->all());
 
-        return redirect()->route("desa.index");
+        return redirect()->route("desa.index")->with('success', 'Desa Berhasil Diupdate');
     }
 
     /**
@@ -92,6 +92,6 @@ class DesaController extends Controller
     {
         Desa::find($id)->delete();
 
-        return redirect()->route("desa.index");
+        return redirect()->route("desa.index")->with('success', 'Desa Berhasil Dihapus');
     }
 }

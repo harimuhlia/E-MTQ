@@ -50,7 +50,7 @@ class GolonganController extends Controller
             'nomorcabang_id' => $request->nomorcabang_id,
             'slug' => $slug,
         ]);
-        return redirect()->route('golongan.index');
+        return redirect()->route('golongan.index')->with('success', 'Golongan Berhasil Ditambahkan');
     }
 
 

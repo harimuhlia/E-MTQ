@@ -48,7 +48,7 @@ class NomorcabangController extends Controller
             'nama_cabang' => $request->nama_cabang,
             'slug' => $slug,
         ]);
-        return redirect()->route('nomorcabang.index');
+        return redirect()->route('nomorcabang.index')->with('success', 'Data Berhasil Ditambahkan');
     }
 
     /**
