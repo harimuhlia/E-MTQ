@@ -77,9 +77,13 @@ class KetentuanusiaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($slug)
     {
-        //
+        $cabangs = Nomorcabang::all();
+        $golongans = Golongan::all();
+        $ketentuanusias = Ketentuanusia::where('slug', $slug)->firstOrFail();
+
+        return view('ketentuan_usia.edit', compact('cabangs', 'golongans', 'ketentuanusias'));
     }
 
     /**
@@ -89,9 +93,25 @@ class KetentuanusiaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $slug)
     {
-        //
+        $request->validate([
+            'usia_minimal' => 'required|string',
+            'usia_maksimal' => 'required|string',
+            'cabang_id' => 'required|exists:nomorcabangs,id',
+            'golongan_id' => 'required|exists:golongans,id',
+        ]);
+        $ketentuanusias = Ketentuanusia::where('slug', $slug)->firstOrFail();
+        $slug = Ketentuanusia::generateUniqueSlug($request->usia_minimal);
+
+        $ketentuanusias->update([
+            'usia_minimal'  => $request->usia_minimal,
+            'usia_maksimal' => $request->usia_maksimal,
+            'cabang_id'     => $request->cabang_id,
+            'golongan_id'   => $request->golongan_id,
+            'slug'          => $slug,
+        ]);
+        return redirect()->route('ketentuanusia.index')->with('success', 'Ketentuan usia berhasil di-edit!');
     }
 
     /**

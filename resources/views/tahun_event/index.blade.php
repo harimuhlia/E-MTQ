@@ -10,7 +10,7 @@
             <div class="card-header">
               <h3 class="card-title">Tabel Seluruh Tahun Event</h3>
               <div class="card-tools">
-                <a href="" class="btn btn-success btn-sm"><i class="fas fa-upload" title="Tambah Data"></i> Import</a>
+                {{-- <a href="" class="btn btn-success btn-sm"><i class="fas fa-upload" title="Tambah Data"></i> Import</a> --}}
                 <a href="{{ route('tahunevent.create') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus" title="Tambah Data"></i> Tambah</a>
               </div>
             </div>
@@ -37,7 +37,7 @@
                       <form action="{{ route('tahunevent.destroy', $item->slug) }}" method="post">
                         @csrf
                         @method('delete')
-                        <a href="{{ route('tahunevent.show', $item->slug) }}" class="btn btn-primary btn-xs"><i class="fas fa-eye"></i></a>
+                        {{-- <a href="{{ route('tahunevent.show', $item->slug) }}" class="btn btn-primary btn-xs"><i class="fas fa-eye"></i></a> --}}
                         <a href="{{ route('tahunevent.edit', $item->slug) }}" class="btn btn-warning btn-xs"><i class="fas fa-edit"></i></a>
                         @if (Auth()->user()->role == 'admin_global')
                         <button class="btn btn-danger btn-xs" onclick="return confirm('Are you sure you want to delete the record {{ $item->slug }} ?')"><i class="fas fa-trash-alt"></i></button>
