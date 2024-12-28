@@ -15,7 +15,11 @@
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
       <!-- Navbar Nama Kecamatan -->
-      <h4>E-MTQ Kec. Rajeg</h4>
+      <h4>
+        <div class="text-center">
+          <img src="{{ asset('AdminLTE') }}/dist/img/logolptq.png" alt="LogoAplikasi" class="brand-image img-fluid" height="10" width="200">
+        </div>
+      </h4>
       <li class="nav-item">
         <a class="nav-link" data-widget="fullscreen" href="#" role="button">
           <i class="fas fa-expand-arrows-alt"></i>

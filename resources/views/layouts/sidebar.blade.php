@@ -2,7 +2,7 @@
     <!-- Brand Logo -->
     <a href="index3.html" class="brand-link">
       <img src="{{ asset('AdminLTE') }}/dist/img/n5logo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-      <span class="brand-text font-weight-light">E-MTQ</span>
+      <span class="brand-text font-weight-light">Kec. Rajeg</span>
     </a>
   
     <!-- Sidebar -->

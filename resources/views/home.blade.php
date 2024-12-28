@@ -135,7 +135,7 @@
           <div class="card-header">
             <h3 class="card-title">
               <i class="fas fa-text-width"></i>
-              Ordered Lists
+              Notifikasi (0)
             </h3>
           </div>
           <!-- /.card-header -->

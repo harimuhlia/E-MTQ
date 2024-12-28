@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Tambah Ketentuan Usia')
+@section('title', 'Edit Ketentuan Usia')
 
 @section('content')
 <section class="content">
@@ -8,7 +8,7 @@
     <div class="col-md-12">
     <div class="card card-primary">
     <div class="card-header">
-    <h3 class="card-title">Formulir Tambah Data Ketentuan Usia</h3>
+    <h3 class="card-title">Formulir Edit Data Ketentuan Usia</h3>
     </div>
 
   @if ($errors->any())
@@ -28,16 +28,23 @@
             <div class="form-group">
               <label for="nama_cabang_usia">Cabang Lomba</label>
           <select name="cabang_id" id="cabang_id" class="form-control" required>
-            @foreach ($cabangs as $cabang)
-                
-            @endforeach
+              <option value="{{ $ketentuanusias->cabang->nama_cabang }}">{{ $ketentuanusias->cabang->nama_cabang }}</option>
+                @foreach($cabangs as $cabang)
+                <option value="{{ $cabang->id }}" 
+                  {{ old('cabang_id', $cabang->cabang_id) == $cabang->id ? 'selected' : '' }}>
+                  {{ $cabang->nama_cabang }}
+                </option>
+                @endforeach
           </select>
             </div>
             <div class="form-group">
               <label for="nama_golongan">Golongan</label>
               <select name="golongan_id" id="golongan_id" class="form-control" required>
+                <option value="{{ $ketentuanusias->golongan->nama_golongan }}">{{ $ketentuanusias->golongan->nama_golongan }}</option>
                   @foreach ($golongans as $golongan)
-                  
+                    <option value="{{ $golongan->id }}" 
+                      {{ old('golongan_id', $golongan->golongan_id) == $golongan->id ? 'selected' : '' }}>
+                      {{ $golongan->nama_golongan }}</option>
                   @endforeach
               </select>
             </div>

@@ -36,9 +36,9 @@
                         @csrf
                         @method('delete')
                         {{-- <a href="#" class="btn btn-primary btn-xs"><i class="fas fa-eye"></i></a> --}}
-                        <a href="{{ route('desa.edit', $item->id) }}" class="btn btn-warning btn-xs"><i class="fas fa-edit"></i></a>
+                        <a href="{{ route('desa.edit', $item->id) }}" class="btn btn-warning btn-xs"><i class="fas fa-edit"></i> Edit</a>
                         @if (Auth()->user()->role == 'admin_global')
-                        <button class="btn btn-danger btn-xs" onclick="return confirm('Are you sure you want to delete the record {{ $item->nama_desa }} ?')"><i class="fas fa-trash-alt"></i></button>
+                        <button class="btn btn-danger btn-xs" onclick="return confirm('Are you sure you want to delete the record {{ $item->nama_desa }} ?')"><i class="fas fa-trash-alt"></i> Hapus</button>
                         @endif
                       </form>
                     </td>

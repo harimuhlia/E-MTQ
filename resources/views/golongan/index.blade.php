@@ -38,9 +38,9 @@
                         @csrf
                         @method('delete')
                         {{-- <a href="{{ route('golongan.show', $item->slug) }}" class="btn btn-primary btn-xs"><i class="fas fa-eye"></i></a> --}}
-                        <a href="{{ route('golongan.edit', $item->slug) }}" class="btn btn-warning btn-xs"><i class="fas fa-edit"></i></a>
+                        <a href="{{ route('golongan.edit', $item->slug) }}" class="btn btn-warning btn-xs"><i class="fas fa-edit"></i>Edit</a>
                         @if (Auth()->user()->role == 'admin_global')
-                        <button class="btn btn-danger btn-xs" onclick="return confirm('Are you sure you want to delete the record {{ $item->slug }} ?')"><i class="fas fa-trash-alt"></i></button>
+                        <button class="btn btn-danger btn-xs" onclick="return confirm('Are you sure you want to delete the record {{ $item->slug }} ?')"><i class="fas fa-trash-alt"></i>Hapus</button>
                         @endif
                       </form>
                     </td>

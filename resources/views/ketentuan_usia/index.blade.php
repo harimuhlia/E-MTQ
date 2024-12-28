@@ -51,10 +51,10 @@
                       <form action="{{ route('ketentuanusia.destroy', $ketentuanusia->id) }}" method="post">
                         @csrf
                         @method('delete')
-                        <a href="{{ route('ketentuanusia.show', $ketentuanusia->slug) }}" class="btn btn-primary btn-xs"><i class="fas fa-eye"></i></a>
-                        <a href="{{ route('ketentuanusia.edit', $ketentuanusia->slug) }}" class="btn btn-warning btn-xs"><i class="fas fa-edit"></i></a>
+                        <a href="{{ route('ketentuanusia.show', $ketentuanusia->slug) }}" class="btn btn-primary btn-xs"><i class="fas fa-eye"></i> Detail</a>
+                        <a href="{{ route('ketentuanusia.edit', $ketentuanusia->slug) }}" class="btn btn-warning btn-xs"><i class="fas fa-edit"></i> Edit</a>
                         @if (Auth()->user()->role == 'admin_global')
-                        <button class="btn btn-danger btn-xs" onclick="return confirm('Are you sure you want to delete the record {{ $ketentuanusia->id }} ?')"><i class="fas fa-trash-alt"></i></button>
+                        <button class="btn btn-danger btn-xs" onclick="return confirm('Are you sure you want to delete the record {{ $ketentuanusia->id }} ?')"><i class="fas fa-trash-alt"></i> Hapus</button>
                         @endif
                       </form>
                     </td>
