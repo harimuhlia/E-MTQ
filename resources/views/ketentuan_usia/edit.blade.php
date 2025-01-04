@@ -21,14 +21,14 @@
         </ul>
     </div>
   @endif
-      <form action="{{ route('ketentuanusia.update', $ketentuanusias->slug) }}" enctype="multipart/form-data" method="POST">
+      <form action="{{ route('ketentuanusia.update', $ketentuanusias->slug) }}" method="POST">
         @csrf
         @method('PUT')
       <div class="card-body">
             <div class="form-group">
               <label for="nama_cabang_usia">Cabang Lomba</label>
           <select name="cabang_id" id="cabang_id" class="form-control" required>
-              <option value="{{ $ketentuanusias->cabang->nama_cabang }}">{{ $ketentuanusias->cabang->nama_cabang }}</option>
+              <option value="">Pilih Cabang</option>
                 @foreach($cabangs as $cabang)
                 <option value="{{ $cabang->id }}" 
                   {{ old('cabang_id', $cabang->cabang_id) == $cabang->id ? 'selected' : '' }}>
@@ -40,7 +40,7 @@
             <div class="form-group">
               <label for="nama_golongan">Golongan</label>
               <select name="golongan_id" id="golongan_id" class="form-control" required>
-                <option value="{{ $ketentuanusias->golongan->nama_golongan }}">{{ $ketentuanusias->golongan->nama_golongan }}</option>
+                <option value="">Pilih Golongan</option>
                   @foreach ($golongans as $golongan)
                     <option value="{{ $golongan->id }}" 
                       {{ old('golongan_id', $golongan->golongan_id) == $golongan->id ? 'selected' : '' }}>

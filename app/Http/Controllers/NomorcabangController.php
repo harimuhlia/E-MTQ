@@ -85,8 +85,8 @@ class NomorcabangController extends Controller
     public function update(Request $request, $slug)
     {
         $request->validate([
-            'kode_cabang' => ['required', 'string', 'max:255', 'unique:nomorcabangs'],
-            'nama_cabang' => ['required', 'string', 'max:255', 'unique:nomorcabangs'],
+            'kode_cabang' => ['required', 'string', 'max:255'],
+            'nama_cabang' => ['required', 'string', 'max:255'],
         ]);
 
         $nomorcabangs = Nomorcabang::where('slug', $slug)->firstOrFail();

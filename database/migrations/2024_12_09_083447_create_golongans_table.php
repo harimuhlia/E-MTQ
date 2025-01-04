@@ -15,10 +15,9 @@ return new class extends Migration
     {
         Schema::create('golongans', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('nomorcabang_id'); // FK ke nomorcabang
-            $table->foreign('nomorcabang_id')->references('id')->on('nomorcabangs')->onDelete('cascade');
-            $table->string('nama_golongan')->unique(); // nama golongan
+            $table->string('nama_golongan');
             $table->string('slug')->unique();
+            $table->foreignId('cabang_id')->constrained('nomorcabangs')->onDelete('cascade');
             $table->timestamps();
         });
     }

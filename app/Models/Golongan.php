@@ -4,18 +4,25 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Golongan extends Model
 {
     use HasFactory;
-    protected $fillable = ['kode_golongan','nama_golongan', 'slug', 'nomorcabang_id'];
+    protected $fillable = ['kode_golongan','nama_golongan', 'slug', 'cabang_id'];
 
-    public static function generateSlug($nama_golongan)
+    public static function boot()
     {
-        return strtolower(str_replace(' ', '-', $nama_golongan));
+        parent::boot();
+        static::creating(function ($golongan) {
+            $golongan->slug = Str::slug($golongan->nama_golongan);
+        });
+        static::updating(function ($golongan) {
+            $golongan->slug = Str::slug($golongan->nama_golongan);
+        });
     }
 
-    public function nomorcabang()
+    public function cabang()
     {
         return $this->belongsTo(Nomorcabang::class);
     }

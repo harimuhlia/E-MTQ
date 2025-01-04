@@ -26,21 +26,21 @@
                 </tr>
                 </thead>
                 <tbody> 
-                  @foreach ($golongans as $item)
+                  @foreach ($golongan as $item)
                   <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $item->nomorcabang->kode_cabang }}</td>
+                    <td>{{ $item->cabang->nama_cabang ?? 'Tidak Ditemukan' }}</td>
                     <td>{{ $item->nama_golongan }}</td>
                     <td>
                       {{-- <a href="#" class="btn btn-primary btn-xs"><i class="fas fa-eye"></i></a>
                       <a href="{{ route('datasiswa.edit',$item->id) }}" class="btn btn-warning btn-xs"><i class="fas fa-edit"></i></a> --}}
-                      <form action="{{ route('golongan.destroy', $item->slug) }}" method="post">
+                      <form action="{{ route('golongan.destroy', $item->id) }}" method="post">
                         @csrf
                         @method('delete')
                         {{-- <a href="{{ route('golongan.show', $item->slug) }}" class="btn btn-primary btn-xs"><i class="fas fa-eye"></i></a> --}}
-                        <a href="{{ route('golongan.edit', $item->slug) }}" class="btn btn-warning btn-xs"><i class="fas fa-edit"></i>Edit</a>
+                        <a href="{{ route('golongan.edit', $item->id) }}" class="btn btn-warning btn-xs"><i class="fas fa-edit"></i>Edit</a>
                         @if (Auth()->user()->role == 'admin_global')
-                        <button class="btn btn-danger btn-xs" onclick="return confirm('Are you sure you want to delete the record {{ $item->slug }} ?')"><i class="fas fa-trash-alt"></i>Hapus</button>
+                        <button class="btn btn-danger btn-xs" onclick="return confirm('Are you sure you want to delete the record {{ $item->id }} ?')"><i class="fas fa-trash-alt"></i>Hapus</button>
                         @endif
                       </form>
                     </td>

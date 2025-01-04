@@ -21,26 +21,23 @@
         </ul>
     </div>
   @endif
-      <form action="{{ route('ketentuanusia.store') }}" enctype="multipart/form-data" method="POST">
+      <form action="{{ route('ketentuanusia.store') }}" method="POST">
       @csrf
       <div class="card-body">
             <div class="form-group">
               <label for="nama_cabang_usia">Cabang Lomba</label>
-          <select name="cabang_id" id="cabang_id" class="form-control" required>
-            <option value="">Pilih Cabang</option>
-            @foreach ($cabangs as $cabang)
-              <option value="{{ $cabang->id }}">{{ $cabang->nama_cabang }}</option>
-            @endforeach
-          </select>
+              <select name="nomorcabang_id" id="nomorcabang_id" class="form-control" required>
+                <option value="">Pilih Cabang Lomba</option>
+                @foreach ($cabangs as $cabangLomba)
+                    <option value="{{ $cabangLomba->id }}">{{ $cabangLomba->nama_cabang }}</option>
+                @endforeach
+              </select>
             </div>
             <div class="form-group">
               <label for="nama_golongan">Golongan</label>
-              <select name="golongan_id" id="golongan_id" class="form-control" required>
+              <select id="golongan_id" name="golongan_id" class="form-control">
                 <option value="">Pilih Golongan</option>
-                  @foreach ($golongans as $golongan)
-                    <option value="{{ $golongan->id }}">{{ $golongan->nama_golongan }}</option>
-                  @endforeach
-              </select>
+            </select>
             </div>
             <div class="form-group">
               <label for="usia_minimal">Usia Minimal</label>
@@ -65,3 +62,26 @@
 </section>
 
 @endsection
+@push('scripts')
+<script>
+    document.getElementById('cabang_id').addEventListener('change', function () {
+        const cabangId = this.value;
+        const golonganSelect = document.getElementById('golongan_id');
+        
+        if (cabangId) {
+            golonganSelect.disabled = false;
+            fetch(`/golongans-by-cabang/${cabangId}`)
+                .then(response => response.json())
+                .then(data => {
+                    golonganSelect.innerHTML = '<option value="">Pilih Golongan</option>';
+                    data.forEach(golongan => {
+                        golonganSelect.innerHTML += `<option value="${golongan.id}">${golongan.nama_golongan}</option>`;
+                    });
+                });
+        } else {
+            golonganSelect.disabled = true;
+            golonganSelect.innerHTML = '<option value="">Pilih Golongan</option>';
+        }
+    });
+</script>
+@endpush

@@ -21,15 +21,15 @@
         </ul>
     </div>
   @endif
-  <form action="{{ route('golongan.store')}}" enctype="multipart/form-data" method="POST">
+  <form action="{{ route('golongan.store') }}" method="POST">
     @csrf
     <div class="card-body">
         <div class="form-group">
             <label for="kode_golongan">Kode Golongan</label>
-            <select name="nomorcabang_id" id="nomorcabang_id" class="form-control" required>
-              <option value="">Pilih Cabang Lomba</option>
-              @foreach ($nomorcabangs as $cabangLomba)
-                  <option value="{{ $cabangLomba->id }}">{{ $cabangLomba->nama_cabang }}</option>
+            <select name="cabang_id" class="form-control" required>
+              <option value="">Pilih Cabang</option>
+              @foreach ($cabang as $item)
+              <option value="{{ $item->id }}">{{ $item->nama_cabang }}</option>
               @endforeach
           </select>
         </div>

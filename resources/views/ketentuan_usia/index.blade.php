@@ -29,7 +29,7 @@
                 </tr>
                 </thead>
                 <tbody> 
-                  @foreach ($ketentuanusias as $ketentuanusia)
+                  @foreach ($ketentuanUsias as $ketentuanusia)
                   <tr>
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $ketentuanusia->cabang->nama_cabang }}</td>

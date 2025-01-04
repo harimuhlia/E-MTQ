@@ -7,121 +7,66 @@ use App\Models\Ketentuanusia;
 use App\Models\Nomorcabang;
 use Illuminate\Http\Request;
 
-class KetentuanusiaController extends Controller
+class KetentuanUsiaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-        $ketentuanusias = Ketentuanusia::with(['cabang', 'golongan'])->get();
-        return view('ketentuan_usia.index', compact('ketentuanusias'));
+        $ketentuanUsias = KetentuanUsia::with('cabang', 'golongan')->get();
+        return view('ketentuan_usia.index', compact('ketentuanUsias'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         $cabangs = Nomorcabang::all();
-        $golongans = Golongan::all();
-
-        return view('ketentuan_usia.create', compact('cabangs', 'golongans'));
+        return view('ketentuan_usia.create', compact('cabangs'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $request->validate([
-            'usia_minimal' => 'required|string',
-            'usia_maksimal' => 'required|string',
-            'cabang_id' => 'required|exists:nomorcabangs,id',
+            'cabang_id' => 'required|exists:cabangs,id',
             'golongan_id' => 'required|exists:golongans,id',
+            'batas_usia' => 'required|integer|min:0',
         ]);
 
-        $slug = Ketentuanusia::generateUniqueSlug($request->usia_minimal);
-
-        Ketentuanusia::create([
-            'usia_minimal'  => $request->usia_minimal,
-            'usia_maksimal' => $request->usia_maksimal,
-            'cabang_id'     => $request->cabang_id,
-            'golongan_id'   => $request->golongan_id,
-            'slug'          => $slug,
-        ]);
-        return redirect()->route('ketentuanusia.index')->with('success', 'Ketentuan usia berhasil ditambahkan!');
+        KetentuanUsia::create($request->all());
+        return redirect()->route('ketentuanusia.index')->with('success', 'Data berhasil ditambahkan');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+    public function show($slug)
     {
-        //
+        $ketentuanUsia = KetentuanUsia::where('slug', $slug)->firstOrFail();
+        return view('ketentuanusia.show', compact('ketentuanUsia'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit($slug)
     {
+        $ketentuanUsia = KetentuanUsia::where('slug', $slug)->firstOrFail();
         $cabangs = Nomorcabang::all();
-        $golongans = Golongan::all();
-        $ketentuanusias = Ketentuanusia::where('slug', $slug)->firstOrFail();
+        $golongans = Golongan::where('cabang_id', $ketentuanUsia->cabang_id)->get();
 
-        return view('ketentuan_usia.edit', compact('cabangs', 'golongans', 'ketentuanusias'));
+        return view('ketentuanusia.edit', compact('ketentuanUsia', 'cabangs', 'golongans'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $slug)
     {
         $request->validate([
-            'usia_minimal' => 'required|string',
-            'usia_maksimal' => 'required|string',
-            'cabang_id' => 'required|exists:nomorcabangs,id',
+            'cabang_id' => 'required|exists:cabangs,id',
             'golongan_id' => 'required|exists:golongans,id',
+            'batas_usia' => 'required|integer|min:0',
         ]);
-        $ketentuanusias = Ketentuanusia::where('slug', $slug)->firstOrFail();
-        $slug = Ketentuanusia::generateUniqueSlug($request->usia_minimal);
 
-        $ketentuanusias->update([
-            'usia_minimal'  => $request->usia_minimal,
-            'usia_maksimal' => $request->usia_maksimal,
-            'cabang_id'     => $request->cabang_id,
-            'golongan_id'   => $request->golongan_id,
-            'slug'          => $slug,
-        ]);
-        return redirect()->route('ketentuanusia.index')->with('success', 'Ketentuan usia berhasil di-edit!');
+        $ketentuanUsia = KetentuanUsia::where('slug', $slug)->firstOrFail();
+        $ketentuanUsia->update($request->all());
+
+        return redirect()->route('ketentuanusia.index')->with('success', 'Data berhasil diperbarui');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
+    public function destroy($slug)
     {
-        //
+        $ketentuanUsia = KetentuanUsia::where('slug', $slug)->firstOrFail();
+        $ketentuanUsia->delete();
+
+        return redirect()->route('ketentuanusia.index')->with('success', 'Data berhasil dihapus');
     }
 }

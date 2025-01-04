@@ -21,18 +21,22 @@
         </ul>
     </div>
   @endif
-  <form action="{{ route('golongan.update', $golongans->slug)}}" enctype="multipart/form-data" method="POST">
+  <form action="{{ route('golongan.update', $golongan->id) }}" method="POST">
     @csrf
     @method('PUT')
   <form>
     <div class="card-body">
         <div class="form-group">
             <label for="kode_golongan">Kode Golongan</label>
-            <input type="text" class="form-control" name="kode_golongan" value="{{ $golongans->kode_golongan }}">
+            <select name="cabang_id" class="form-control" required>
+              @foreach ($cabang as $item)
+              <option value="{{ $item->id }}" {{ $item->id == $golongan->cabang_id ? 'selected' : '' }}>{{ $item->nama_cabang }}</option>
+              @endforeach
+          </select>
         </div>
         <div class="form-group">
             <label for="nama_golongan">Nama Golongan</label>
-            <input type="text" class="form-control" name="nama_golongan" value="{{ $golongans->nama_golongan }}">
+            <input type="text" class="form-control" name="nama_golongan" value="{{ $golongan->nama_golongan }}">
         </div>
     <div class="card-footer">
     <button type="submit" class="btn btn-primary">Submit</button>

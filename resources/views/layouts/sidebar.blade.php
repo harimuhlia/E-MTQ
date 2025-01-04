@@ -1,8 +1,8 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
     <a href="index3.html" class="brand-link">
-      <img src="{{ asset('AdminLTE') }}/dist/img/n5logo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-      <span class="brand-text font-weight-light">Kec. Rajeg</span>
+      <img src="{{ asset('AdminLTE') }}/dist/img/logolptq2.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+      <span class="brand-text font-weight-light"><strong>E-MTQ Kec.Rajeg</strong></span>
     </a>
   
     <!-- Sidebar -->
@@ -10,11 +10,11 @@
       <!-- Sidebar user panel (optional) -->
       <div class="user-panel mt-3 pb-3 mb-3 d-flex">
         <div class="image">
-          <img src="#" class="img-circle elevation-2" alt="Foto Profil">
+          <img src="{{ asset('AdminLTE') }}/dist/img/avatar5.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8" class="img-circle elevation-2" alt="Foto Profil">
         </div>
         <div class="info">
-          <a href="#" class="d-block">#</a>
-          <span class="text-success"><i class="fas fa-circle nav-icon"></i> #</span>
+          <a href="#" class="d-block">Camat Rajeg</a>
+          <span class="text-success"><i class="fas fa-circle nav-icon"></i> Administrator</span>
         </div>
       </div>
   
