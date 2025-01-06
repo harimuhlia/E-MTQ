@@ -7,7 +7,7 @@
       <div class="row">
         <div class="col-12">
           <div class="row">
-            <div class="col-md-3 col-sm-6 col-12">
+            <div class="col-md-3 col-sm-5 col-15">
               <div class="info-box bg-info">
                 <span class="info-box-icon"><i class="far fa-bookmark"></i></span>
   
@@ -47,7 +47,7 @@
               <!-- /.info-box -->
             </div>
             <!-- /.col -->
-            <div class="col-md-3 col-sm-6 col-12">
+            <div class="col-md-3 col-sm-5 col-15">
               <div class="info-box bg-warning">
                 <span class="info-box-icon"><i class="far fa-calendar-alt"></i></span>
   

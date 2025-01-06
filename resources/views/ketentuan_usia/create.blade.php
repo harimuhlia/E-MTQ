@@ -51,6 +51,28 @@
                 <button type="submit" class="btn btn-primary">Submit</button>
                 <a class="btn btn-success" href="{{ route('ketentuanusia.index')}}">Kembali</a>
               </div>
+
+              <script>
+                document.getElementById('cabang_id').addEventListener('change', function () {
+                    const cabangId = this.value;
+                    const golonganSelect = document.getElementById('golongan_id');
+                    
+                    if (cabangId) {
+                        golonganSelect.disabled = false;
+                        fetch(`/golongans-by-cabang/${cabangId}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                golonganSelect.innerHTML = '<option value="">Pilih Golongan</option>';
+                                data.forEach(golongan => {
+                                    golonganSelect.innerHTML += `<option value="${golongan.id}">${golongan.nama_golongan}</option>`;
+                                });
+                            });
+                    } else {
+                        golonganSelect.disabled = true;
+                        golonganSelect.innerHTML = '<option value="">Pilih Golongan</option>';
+                    }
+                });
+            </script>
       </form>
               <!-- /.card -->
             </div>
@@ -62,7 +84,7 @@
 </section>
 
 @endsection
-@push('scripts')
+{{-- @push('scripts')
 <script>
     document.getElementById('cabang_id').addEventListener('change', function () {
         const cabangId = this.value;
@@ -84,4 +106,4 @@
         }
     });
 </script>
-@endpush
+@endpush --}}

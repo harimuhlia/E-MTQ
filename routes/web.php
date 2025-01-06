@@ -38,6 +38,3 @@ Route::post('pendaftaran', [PendaftaranController::class, 'store'])->name('penda
 
 // AJAX untuk mengambil golongan berdasarkan cabang lomba
 Route::get('golongan-by-cabang', [PendaftaranController::class, 'getGolonganByCabang'])->middleware('auth');
-Route::get('/golongans-by-cabang/{cabang}', function ($cabangId) {
-    return response()->json(\App\Models\Golongan::where('cabang_id', $cabangId)->get());
-})->middleware('auth');
