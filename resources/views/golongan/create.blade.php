@@ -26,7 +26,7 @@
     <div class="card-body">
         <div class="form-group">
             <label for="kode_golongan">Kode Golongan</label>
-            <select name="cabang_id" class="form-control" required>
+            <select name="nomorcabang_id" class="form-control" required>
               <option value="">Pilih Cabang</option>
               @foreach ($cabang as $item)
               <option value="{{ $item->id }}">{{ $item->nama_cabang }}</option>

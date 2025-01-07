@@ -24,7 +24,7 @@ class GolonganController extends Controller
     {
         $request->validate([
             'nama_golongan' => 'required',
-            'cabang_id' => 'required',
+            'nomorcabang_id' => 'required',
         ]);
 
         Golongan::create($request->all());
