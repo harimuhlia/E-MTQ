@@ -29,7 +29,7 @@
                   @foreach ($golongan as $item)
                   <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $item->cabang->nama_cabang ?? 'Tidak Ditemukan' }}</td>
+                    <td>{{ $item->nomorcabang_id }}</td>
                     <td>{{ $item->nama_golongan }}</td>
                     <td>
                       {{-- <a href="#" class="btn btn-primary btn-xs"><i class="fas fa-eye"></i></a>

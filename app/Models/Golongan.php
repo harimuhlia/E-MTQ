@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 class Golongan extends Model
 {
     use HasFactory;
-    protected $fillable = ['kode_golongan','nama_golongan', 'slug', 'nomorcabang_id'];
+    protected $fillable = ['kode_golongan','nama_golongan', 'slug', 'nomorcabang_id', 'nama_cabang'];
 
     public static function boot()
     {

@@ -51,28 +51,6 @@
                 <button type="submit" class="btn btn-primary">Submit</button>
                 <a class="btn btn-success" href="{{ route('ketentuanusia.index')}}">Kembali</a>
               </div>
-
-              <script>
-                document.getElementById('cabang_id').addEventListener('change', function () {
-                    const cabangId = this.value;
-                    const golonganSelect = document.getElementById('golongan_id');
-                    
-                    if (cabangId) {
-                        golonganSelect.disabled = false;
-                        fetch(`/golongans-by-cabang/${cabangId}`)
-                            .then(response => response.json())
-                            .then(data => {
-                                golonganSelect.innerHTML = '<option value="">Pilih Golongan</option>';
-                                data.forEach(golongan => {
-                                    golonganSelect.innerHTML += `<option value="${golongan.id}">${golongan.nama_golongan}</option>`;
-                                });
-                            });
-                    } else {
-                        golonganSelect.disabled = true;
-                        golonganSelect.innerHTML = '<option value="">Pilih Golongan</option>';
-                    }
-                });
-            </script>
       </form>
               <!-- /.card -->
             </div>
@@ -84,26 +62,31 @@
 </section>
 
 @endsection
-{{-- @push('scripts')
+
 <script>
-    document.getElementById('cabang_id').addEventListener('change', function () {
-        const cabangId = this.value;
-        const golonganSelect = document.getElementById('golongan_id');
-        
-        if (cabangId) {
-            golonganSelect.disabled = false;
-            fetch(`/golongans-by-cabang/${cabangId}`)
-                .then(response => response.json())
-                .then(data => {
-                    golonganSelect.innerHTML = '<option value="">Pilih Golongan</option>';
-                    data.forEach(golongan => {
-                        golonganSelect.innerHTML += `<option value="${golongan.id}">${golongan.nama_golongan}</option>`;
-                    });
-                });
-        } else {
-            golonganSelect.disabled = true;
-            golonganSelect.innerHTML = '<option value="">Pilih Golongan</option>';
-        }
-    });
+  // Ketika cabang lomba dipilih
+  $('#nomorcabang_id').change(function () {
+      var cabangLombaId = $(this).val();
+      if (cabangLombaId) {
+          // Mengambil golongan berdasarkan cabang lomba yang dipilih
+          $.ajax({
+              url: '/golongans-by-cabang',
+              method: 'GET',
+              data: {
+                  nomorcabang_id: cabangLombaId
+              },
+              success: function (response) {
+                  var golonganSelect = $('#golongan');
+                  golonganSelect.empty(); // Kosongkan pilihan golongan
+                  golonganSelect.append('<option value="">Pilih Golongan</option>');
+                  $.each(response, function (index, golongan) {
+                      golonganSelect.append('<option value="' + golongan.id + '">' + golongan.nama_golongan + '</option>');
+                  });
+              }
+          });
+      } else {
+          $('#golongan').empty();
+          $('#golongan').append('<option value="">Pilih Golongan</option>');
+      }
+  });
 </script>
-@endpush --}}
