@@ -32,8 +32,8 @@ Route::resource("desa", DesaController::class)->middleware(['auth']);
 Route::resource("tahunevent", TahuneventController::class)->middleware('auth');
 Route::resource("cabang", CabangController::class)->middleware('auth');
 Route::resource("golongan", GolonganController::class)->middleware('auth');
-Route::resource('ketentuanusia', ControllersKetentuanUsiaController::class)->middleware('auth');
-Route::get('golongan-by-cabang/{cabangId}', [KetentuanUsiaController::class, 'getGolonganByCabang'])->middleware('auth');
+Route::resource('ketentuanusia', KetentuanUsiaController::class)->middleware('auth');
+Route::get('get-golongan/{cabang_id}', [KetentuanUsiaController::class, 'getGolonganByCabang'])->middleware('auth');
 
 Route::get('pendaftaran/create', [PendaftaranController::class, 'create'])->name('pendaftaran.create')->middleware('auth');
 Route::post('pendaftaran', [PendaftaranController::class, 'store'])->name('pendaftaran.store')->middleware('auth');

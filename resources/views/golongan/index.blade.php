@@ -29,8 +29,8 @@
                   @foreach ($golongan as $item)
                   <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $item->nama }}</td>
                     <td>{{ $item->cabang->nama }}</td>
+                    <td>{{ $item->nama }}</td>
                     <td>
                       {{-- <a href="#" class="btn btn-primary btn-xs"><i class="fas fa-eye"></i></a>
                       <a href="{{ route('datasiswa.edit',$item->id) }}" class="btn btn-warning btn-xs"><i class="fas fa-edit"></i></a> --}}

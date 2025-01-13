@@ -32,14 +32,14 @@
                   @foreach ($ketentuanUsia as $item)
                   <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $item->cabang->nama_cabang }}</td>
-                    <td>{{ $item->golongan->nama_golongan }}</td>
-                    <td>{{ $item->usia_minimal }}</td>
-                    <td>{{ $item->usia_maksimal }}</td>
+                    <td>{{ $item->cabang->nama }}</td>
+                    <td>{{ $item->golongan->nama }}</td>
+                    <td>{{ $item->min_usia }}</td>
+                    <td>{{ $item->max_usia }}</td>
                     <td>
                         @php
-                            $minimal = \Carbon\Carbon::parse($item->usia_minimal);
-                            $maksimal = \Carbon\Carbon::parse($item->usia_maksimal);
+                            $minimal = \Carbon\Carbon::parse($item->min_usia);
+                            $maksimal = \Carbon\Carbon::parse($item->max_usia);
 
                             $years = $minimal->diffInYears($maksimal);
                             $months = $minimal->diffInMonths($maksimal) % 12;
@@ -54,7 +54,7 @@
                         <a href="{{ route('ketentuanusia.show', $item->id) }}" class="btn btn-primary btn-xs"><i class="fas fa-eye"></i> Detail</a>
                         <a href="{{ route('ketentuanusia.edit', $item->id) }}" class="btn btn-warning btn-xs"><i class="fas fa-edit"></i> Edit</a>
                         @if (Auth()->user()->role == 'admin_global')
-                        <button class="btn btn-danger btn-xs" onclick="return confirm('Are you sure you want to delete the record {{ $ketentuanusia->id }} ?')"><i class="fas fa-trash-alt"></i> Hapus</button>
+                        <button class="btn btn-danger btn-xs" onclick="return confirm('Are you sure you want to delete the record {{ $item->id }} ?')"><i class="fas fa-trash-alt"></i> Hapus</button>
                         @endif
                       </form>
                     </td>

@@ -21,7 +21,7 @@
         </ul>
     </div>
   @endif
-      <form action="{{ route('ketentuanusia.update', $ketentuanusias->slug) }}" method="POST">
+      <form action="{{ route('ketentuanusia.update', $ketentuanUsia->id) }}" method="POST">
         @csrf
         @method('PUT')
       <div class="card-body">

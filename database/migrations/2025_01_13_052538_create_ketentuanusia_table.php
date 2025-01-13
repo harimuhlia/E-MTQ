@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('cabang_id')->constrained('cabangs')->onDelete('cascade');
             $table->foreignId('golongan_id')->constrained('golongans')->onDelete('cascade');
-            $table->integer('min_usia'); // Usia minimal
-            $table->integer('max_usia'); // Usia maksimal
+            $table->string('min_usia'); // Usia minimal
+            $table->string('max_usia'); // Usia maksimal
             $table->timestamps();
         });
     }

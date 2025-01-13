@@ -25,7 +25,7 @@
     @csrf
     <div class="card-body">
         <div class="form-group">
-            <label for="kode_golongan">Kode Golongan</label>
+            <label for="kode_golongan">Cabang</label>
             <select name="cabang_id" class="form-control" required>
               <option value="">Pilih Cabang</option>
               @foreach ($cabangs as $item)
@@ -34,7 +34,7 @@
           </select>
         </div>
         <div class="form-group">
-            <label for="nama">Nama Golongan</label>
+            <label for="nama">Golongan</label>
             <input type="text" class="form-control" name="nama" id="nama_golongan" placeholder="Silakan Masukan Nama Golongan">
         </div>
     <div class="card-footer">
