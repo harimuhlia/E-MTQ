@@ -11,7 +11,7 @@
               <h3 class="card-title">Tabel Seluruh Nomor Cabang</h3>
               <div class="card-tools">
                 {{-- <a href="" class="btn btn-success btn-sm"><i class="fas fa-upload" title="Tambah Data"></i> Import</a> --}}
-                <a href="{{ route('nomorcabang.create') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus" title="Tambah Data"></i> Tambah</a>
+                <a href="{{ route('cabang.create') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus" title="Tambah Data"></i> Tambah</a>
               </div>
             </div>
             <!-- /.card-header -->
@@ -20,27 +20,25 @@
                 <thead>
                 <tr>
                   <th>#</th>
-                  <th>Nomor Cabang</th>
                   <th>Nama Cabang</th>
                   <th>Edit</th>
                 </tr>
                 </thead>
                 <tbody> 
-                  @foreach ($nomorcabangs as $item)
+                  @foreach ($cabang as $item)
                   <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $item->kode_cabang }}</td>
-                    <td>{{ $item->nama_cabang }}</td>
+                    <td>{{ $item->nama }}</td>
                     <td>
                       {{-- <a href="#" class="btn btn-primary btn-xs"><i class="fas fa-eye"></i></a>
                       <a href="{{ route('datasiswa.edit',$item->id) }}" class="btn btn-warning btn-xs"><i class="fas fa-edit"></i></a> --}}
-                      <form action="{{ route('nomorcabang.destroy', $item->slug) }}" method="post">
+                      <form action="{{ route('cabang.destroy', $item->id) }}" method="post">
                         @csrf
                         @method('delete')
                         {{-- <a href="{{ route('nomorcabang.show', $item->slug) }}" class="btn btn-primary btn-xs"><i class="fas fa-eye"></i></a> --}}
-                        <a href="{{ route('nomorcabang.edit', $item->slug) }}" class="btn btn-warning btn-xs"><i class="fas fa-edit"></i> Edit</a>
+                        <a href="{{ route('cabang.edit', $item->id) }}" class="btn btn-warning btn-xs"><i class="fas fa-edit"></i> Edit</a>
                         @if (Auth()->user()->role == 'admin_global')
-                        <button class="btn btn-danger btn-xs" onclick="return confirm('Are you sure you want to delete the record {{ $item->slug }} ?')"><i class="fas fa-trash-alt"></i> Hapus</button>
+                        <button class="btn btn-danger btn-xs" onclick="return confirm('Are you sure you want to delete the record {{ $item->id }} ?')"><i class="fas fa-trash-alt"></i> Hapus</button>
                         @endif
                       </form>
                     </td>
@@ -50,7 +48,6 @@
                 <tfoot>
                 <tr>
                     <th>#</th>
-                    <th>Nomor Cabang</th>
                     <th>Nama Cabang</th>
                     <th>Edit</th>
                 </tr>

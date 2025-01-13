@@ -43,8 +43,8 @@
                   </p>
                 </a>
               </li>
-              <li class="nav-item has-treeview {{ request()->is('tahunevent*') || request()->is('ketentuanusia*') || request()->is('desa*') || request()->is('golongan*') || request()->is('nomorcabang*') ? 'menu-open' : '' }}">
-                <a href="#" class="nav-link {{ request()->is('tahunevent*') || request()->is('desa*') || request()->is('ketentuanusia*') || request()->is('golongan*') || request()->is('nomorcabang*') ? 'active' : '' }}">
+              <li class="nav-item has-treeview {{ request()->is('tahunevent*') || request()->is('ketentuanusia*') || request()->is('desa*') || request()->is('golongan*') || request()->is('cabang*') ? 'menu-open' : '' }}">
+                <a href="#" class="nav-link {{ request()->is('tahunevent*') || request()->is('desa*') || request()->is('ketentuanusia*') || request()->is('golongan*') || request()->is('cabang*') ? 'active' : '' }}">
                   <i class="nav-icon far fa-id-card"></i>
                   <p>
                     Data Master
@@ -65,7 +65,7 @@
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="{{ route('nomorcabang.index')}}" class="nav-link {{ (request()->is('nomorcabang*')) ? 'active' : '' }}">
+                    <a href="{{ route('cabang.index')}}" class="nav-link {{ (request()->is('cabang*')) ? 'active' : '' }}">
                       <i class="far fa-circle nav-icon"></i>
                       <p>No. Cabang</p>
                     </a>

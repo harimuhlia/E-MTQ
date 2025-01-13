@@ -21,22 +21,18 @@
         </ul>
     </div>
   @endif
-  <form action="{{ route('nomorcabang.update', $nomorcabangs->slug)}}" enctype="multipart/form-data" method="POST">
+  <form action="{{ route('cabang.update', $cabang->id)}}" method="POST">
     @csrf
     @method('PUT')
   <form>
     <div class="card-body">
         <div class="form-group">
-            <label for="kode_cabang">Kode Cabang</label>
-            <input type="text" class="form-control" name="kode_cabang" id="kode_cabang" value="{{ $nomorcabangs->kode_cabang }}">
-        </div>
-        <div class="form-group">
-            <label for="nama_cabang">Nama Cabang</label>
-            <input type="text" class="form-control" name="nama_cabang" id="nama_cabang" value="{{ $nomorcabangs->nama_cabang }}">
+            <label for="nama">Nama Cabang</label>
+            <input type="text" class="form-control" name="nama" id="nama" value="{{ $cabang->nama }}">
         </div>
     <div class="card-footer">
     <button type="submit" class="btn btn-primary">Submit</button>
-    <a class="btn btn-success" href="{{ route('nomorcabang.index')}}">Kembali</a>
+    <a class="btn btn-success" href="{{ route('cabang.index')}}">Kembali</a>
     </div>
     </form>
               <!-- /.card -->

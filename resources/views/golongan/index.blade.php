@@ -20,8 +20,8 @@
                 <thead>
                 <tr>
                   <th>#</th>
-                  <th>Nomor Cabang</th>
-                  <th>Nama Golongan</th>
+                  <th>Cabang</th>
+                  <th>Golongan</th>
                   <th>Edit</th>
                 </tr>
                 </thead>
@@ -29,8 +29,8 @@
                   @foreach ($golongan as $item)
                   <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $item->nomorcabang_id }}</td>
-                    <td>{{ $item->nama_golongan }}</td>
+                    <td>{{ $item->nama }}</td>
+                    <td>{{ $item->cabang->nama }}</td>
                     <td>
                       {{-- <a href="#" class="btn btn-primary btn-xs"><i class="fas fa-eye"></i></a>
                       <a href="{{ route('datasiswa.edit',$item->id) }}" class="btn btn-warning btn-xs"><i class="fas fa-edit"></i></a> --}}
@@ -50,8 +50,8 @@
                 <tfoot>
                 <tr>
                     <th>#</th>
-                    <th>Nomor Cabang</th>
-                    <th>Nama Golongan</th>
+                    <th>Cabang</th>
+                    <th>Golongan</th>
                     <th>Edit</th>
                 </tr>
                 </tfoot>

@@ -13,13 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('ketentuanusias', function (Blueprint $table) {
+        Schema::create('cabangs', function (Blueprint $table) {
             $table->id();
-            $table->string('usia_minimal');
-            $table->string('usia_maksimal');
-            $table->foreignId('cabang_id')->constrained('nomorcabangs')->onDelete('cascade');
-            $table->foreignId('golongan_id')->constrained('golongans')->onDelete('cascade');
-            $table->string('slug')->unique();
+            $table->string('nama');
             $table->timestamps();
         });
     }
@@ -31,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ketentuanusias');
+        Schema::dropIfExists('cabangs');
     }
 };

@@ -2,71 +2,76 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cabang;
 use App\Models\Golongan;
-use App\Models\Ketentuanusia;
-use App\Models\Nomorcabang;
+use App\Models\KetentuanUsia;
 use Illuminate\Http\Request;
 
 class KetentuanUsiaController extends Controller
 {
+    // Menampilkan semua data ketentuan usia
     public function index()
     {
-        $ketentuanUsias = KetentuanUsia::with('cabang', 'golongan')->get();
-        return view('ketentuan_usia.index', compact('ketentuanUsias'));
+        $ketentuanUsia = KetentuanUsia::with(['cabang', 'golongan'])->get();
+        return view('ketentuan_usia.index', compact('ketentuanUsia'));
     }
 
+    // Menampilkan form untuk membuat ketentuan usia baru
     public function create()
     {
-        $cabangs = Nomorcabang::all();
+        $cabangs = Cabang::all(); // Ambil semua data cabang
         return view('ketentuan_usia.create', compact('cabangs'));
     }
 
+    // Menyimpan data ketentuan usia baru
     public function store(Request $request)
     {
         $request->validate([
             'cabang_id' => 'required|exists:cabangs,id',
             'golongan_id' => 'required|exists:golongans,id',
-            'batas_usia' => 'required|integer|min:0',
+            'min_usia' => 'required|integer',
+            'max_usia' => 'required|integer',
         ]);
 
         KetentuanUsia::create($request->all());
-        return redirect()->route('ketentuanusia.index')->with('success', 'Data berhasil ditambahkan');
+
+        return redirect()->route('ketentuan_usia.index')->with('success', 'Ketentuan Usia berhasil ditambahkan');
     }
 
-    public function show($slug)
+    // Menampilkan form untuk mengedit ketentuan usia
+    public function edit(KetentuanUsia $ketentuanUsia)
     {
-        $ketentuanUsia = KetentuanUsia::where('slug', $slug)->firstOrFail();
-        return view('ketentuanusia.show', compact('ketentuanUsia'));
+        $cabangs = Cabang::all(); // Ambil semua data cabang
+        $golongans = Golongan::where('cabang_id', $ketentuanUsia->cabang_id)->get(); // Filter golongan berdasarkan cabang yang dipilih
+        return view('ketentuan_usia.edit', compact('ketentuanUsia', 'cabangs', 'golongans'));
     }
 
-    public function edit($slug)
-    {
-        $ketentuanUsia = KetentuanUsia::where('slug', $slug)->firstOrFail();
-        $cabangs = Nomorcabang::all();
-        $golongans = Golongan::where('cabang_id', $ketentuanUsia->cabang_id)->get();
-
-        return view('ketentuanusia.edit', compact('ketentuanUsia', 'cabangs', 'golongans'));
-    }
-
-    public function update(Request $request, $slug)
+    // Mengupdate data ketentuan usia
+    public function update(Request $request, KetentuanUsia $ketentuanUsia)
     {
         $request->validate([
             'cabang_id' => 'required|exists:cabangs,id',
             'golongan_id' => 'required|exists:golongans,id',
-            'batas_usia' => 'required|integer|min:0',
+            'min_usia' => 'required|integer',
+            'max_usia' => 'required|integer',
         ]);
 
-        $ketentuanUsia = KetentuanUsia::where('slug', $slug)->firstOrFail();
         $ketentuanUsia->update($request->all());
 
-        return redirect()->route('ketentuanusia.index')->with('success', 'Data berhasil diperbarui');
+        return redirect()->route('ketentuan_usia.index')->with('success', 'Ketentuan Usia berhasil diupdate');
     }
 
-    public function destroy($slug)
+    // Menghapus ketentuan usia
+    public function destroy(KetentuanUsia $ketentuanUsia)
     {
-        $ketentuanUsia = KetentuanUsia::where('slug', $slug)->firstOrFail();
         $ketentuanUsia->delete();
+        return redirect()->route('ketentuan_usia.index')->with('success', 'Ketentuan Usia berhasil dihapus');
+    }
 
-        return redirect()->route('ketentuanusia.index')->with('success', 'Data berhasil dihapus');
+    // Menampilkan golongan berdasarkan cabang yang dipilih
+    public function getGolonganByCabang($cabangId)
+    {
+        $golongans = Golongan::where('cabang_id', $cabangId)->get();
+        return response()->json($golongans);
     }
 }

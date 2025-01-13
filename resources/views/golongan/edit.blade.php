@@ -27,16 +27,16 @@
   <form>
     <div class="card-body">
         <div class="form-group">
-            <label for="kode_golongan">Kode Golongan</label>
+            <label for="kode_golongan">Cabang</label>
             <select name="cabang_id" class="form-control" required>
-              @foreach ($cabang as $item)
-              <option value="{{ $item->id }}" {{ $item->id == $golongan->cabang_id ? 'selected' : '' }}>{{ $item->nama_cabang }}</option>
+              @foreach ($cabangs as $item)
+              <option value="{{ $item->id }}" {{ $golongan->cabang_id == $item->id ? 'selected' : '' }}>{{ $item->nama }}</option>
               @endforeach
           </select>
         </div>
         <div class="form-group">
-            <label for="nama_golongan">Nama Golongan</label>
-            <input type="text" class="form-control" name="nama_golongan" value="{{ $golongan->nama_golongan }}">
+            <label for="nama">Golongan</label>
+            <input type="text" class="form-control" name="nama" value="{{ $golongan->nama }}">
         </div>
     <div class="card-footer">
     <button type="submit" class="btn btn-primary">Submit</button>

@@ -21,21 +21,17 @@
         </ul>
     </div>
   @endif
-  <form action="{{ route('nomorcabang.store')}}" enctype="multipart/form-data" method="POST">
+  <form action="{{ route('cabang.store')}}" enctype="multipart/form-data" method="POST">
     @csrf
   <form>
     <div class="card-body">
         <div class="form-group">
-            <label for="kode_cabang">Kode Cabang</label>
-            <input type="text" class="form-control" name="kode_cabang" placeholder="Silakan Masukan Kode Cabang">
-        </div>
-        <div class="form-group">
-            <label for="nama_cabang">Nama Cabang</label>
-            <input type="text" class="form-control" name="nama_cabang" placeholder="Silakan Masukan Nama Cabang">
+            <label for="nama">Nama Cabang</label>
+            <input type="text" class="form-control" name="nama" placeholder="Silakan Masukan Nama Cabang">
         </div>
     <div class="card-footer">
     <button type="submit" class="btn btn-primary">Submit</button>
-    <a class="btn btn-success" href="{{ route('nomorcabang.index')}}">Kembali</a>
+    <a class="btn btn-success" href="{{ route('cabang.index')}}">Kembali</a>
     </div>
     </form>
               <!-- /.card -->

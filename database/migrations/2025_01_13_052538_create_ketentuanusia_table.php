@@ -13,11 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('golongans', function (Blueprint $table) {
+        Schema::create('ketentuanusia', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_golongan');
-            $table->string('slug')->unique();
-            $table->foreignId('cabang_id')->constrained('nomorcabangs')->onDelete('cascade');
+            $table->foreignId('cabang_id')->constrained('cabangs')->onDelete('cascade');
+            $table->foreignId('golongan_id')->constrained('golongans')->onDelete('cascade');
+            $table->integer('min_usia'); // Usia minimal
+            $table->integer('max_usia'); // Usia maksimal
             $table->timestamps();
         });
     }
@@ -29,6 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('golongans');
+        Schema::dropIfExists('ketentuanusia');
     }
 };

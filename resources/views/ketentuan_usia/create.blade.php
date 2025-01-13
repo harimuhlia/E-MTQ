@@ -28,14 +28,14 @@
               <label for="nama_cabang_usia">Cabang Lomba</label>
               <select name="nomorcabang_id" id="nomorcabang_id" class="form-control" required>
                 <option value="">Pilih Cabang Lomba</option>
-                @foreach ($cabangs as $cabangLomba)
-                    <option value="{{ $cabangLomba->id }}">{{ $cabangLomba->nama_cabang }}</option>
+                @foreach ($cabangs as $cabang)
+                <option value="{{ $cabang->id }}">{{ $cabang->nama }}</option>
                 @endforeach
               </select>
             </div>
             <div class="form-group">
-              <label for="nama_golongan">Golongan</label>
-              <select id="golongan_id" name="golongan_id" class="form-control">
+              <label for="golongan_id" class="form-label">Golongan</label>
+            <select class="form-control" id="golongan_id" name="golongan_id" required>
                 <option value="">Pilih Golongan</option>
             </select>
             </div>
@@ -59,34 +59,7 @@
           <!-- /.row -->
         </div>
         <!-- /.container-fluid -->
+
 </section>
 
 @endsection
-
-<script>
-  // Ketika cabang lomba dipilih
-  $('#nomorcabang_id').change(function () {
-      var cabangLombaId = $(this).val();
-      if (cabangLombaId) {
-          // Mengambil golongan berdasarkan cabang lomba yang dipilih
-          $.ajax({
-              url: '/golongans-by-cabang',
-              method: 'GET',
-              data: {
-                  nomorcabang_id: cabangLombaId
-              },
-              success: function (response) {
-                  var golonganSelect = $('#golongan');
-                  golonganSelect.empty(); // Kosongkan pilihan golongan
-                  golonganSelect.append('<option value="">Pilih Golongan</option>');
-                  $.each(response, function (index, golongan) {
-                      golonganSelect.append('<option value="' + golongan.id + '">' + golongan.nama_golongan + '</option>');
-                  });
-              }
-          });
-      } else {
-          $('#golongan').empty();
-          $('#golongan').append('<option value="">Pilih Golongan</option>');
-      }
-  });
-</script>
