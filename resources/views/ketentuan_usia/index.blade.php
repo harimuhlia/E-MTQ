@@ -10,7 +10,7 @@
             <div class="card-header">
               <h3 class="card-title">Tabel Ketentuan Usia</h3>
               <div class="card-tools">
-                <a href="" class="btn btn-success btn-sm"><i class="fas fa-upload" title="Tambah Data"></i> Import</a>
+                {{-- <a href="" class="btn btn-success btn-sm"><i class="fas fa-upload" title="Tambah Data"></i> Import</a> --}}
                 <a href="{{ route('ketentuanusia.create') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus" title="Tambah Data"></i> Tambah</a>
               </div>
             </div>

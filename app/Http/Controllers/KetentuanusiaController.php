@@ -39,21 +39,21 @@ class KetentuanUsiaController extends Controller
     }
 
     // Menampilkan form untuk mengedit ketentuan usia
-    public function edit(KetentuanUsia $ketentuanUsia)
-    {
-        $cabangs = Cabang::all();
-        return view('ketentuan_usia.edit', compact('ketentuanUsia', 'cabangs'));
-    }
     // public function edit(KetentuanUsia $ketentuanUsia)
     // {
-    //     $cabangs = Cabang::all(); // Ambil semua data cabang
-    //     $golongans = Golongan::where('cabang_id', $ketentuanUsia->cabang_id)->get(); // Filter golongan berdasarkan cabang yang dipilih
-    //     $ketentuanUsia = KetentuanUsia::all();
-    //     return view('ketentuan_usia.edit', compact('ketentuanUsia', 'cabangs', 'golongans'));
+    //     $cabangs = Cabang::all();
+    //     return view('ketentuan_usia.edit', compact('ketentuanUsia', 'cabangs'));
     // }
+    public function edit(KetentuanUsia $ket_usia)
+{
+    $cabangs = Cabang::all();
+    $golongans = Golongan::where('cabang_id', $ket_usia->cabang_id)->get();
+
+    return view('ketentuan_usia.edit', compact('ket_usia', 'cabangs', 'golongans'));
+}
 
     // Mengupdate data ketentuan usia
-    public function update(Request $request, KetentuanUsia $ketentuanUsia)
+    public function update(Request $request, KetentuanUsia $ket_usia)
     {
         $request->validate([
             'cabang_id' => 'required|exists:cabangs,id',
@@ -62,7 +62,7 @@ class KetentuanUsiaController extends Controller
             'max_usia' => 'required|integer',
         ]);
 
-        $ketentuanUsia->update($request->all());
+        $ket_usia->update($request->all());
 
         return redirect()->route('ketentuan_usia.index')->with('success', 'Ketentuan Usia berhasil diupdate');
     }

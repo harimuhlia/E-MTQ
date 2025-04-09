@@ -21,46 +21,61 @@
         </ul>
     </div>
   @endif
-      <form action="{{ route('ketentuanusia.update', $ketentuanUsia->id) }}" method="POST">
+  <form action="{{ route('ketentuanusia.update', $ket_usia->id) }}" method="POST">
         @csrf
         @method('PUT')
       <div class="card-body">
             <div class="form-group">
               <label for="nama_cabang_usia">Cabang Lomba</label>
-          <select name="cabang_id" id="cabang_id" class="form-control" required>
-              <option value="">Pilih Cabang</option>
-                @foreach($cabangs as $cabang)
+          <select id="cabang_id" name="cabang_id" class="form-control" required>
+            <option value="">-- Pilih Cabang --</option>
+            @foreach ($cabangs as $cabang)
                 <option value="{{ $cabang->id }}" 
-                  {{ old('cabang_id', $cabang->cabang_id) == $cabang->id ? 'selected' : '' }}>
-                  {{ $cabang->nama_cabang }}
+                        {{ $ketentuanUsia->cabang_id == $cabang->id ? 'selected' : '' }}>
+                    {{ $cabang->nama }}
                 </option>
-                @endforeach
-          </select>
+            @endforeach
+        </select>
             </div>
             <div class="form-group">
-              <label for="nama_golongan">Golongan</label>
-              <select name="golongan_id" id="golongan_id" class="form-control" required>
-                <option value="">Pilih Golongan</option>
-                  @foreach ($golongans as $golongan)
-                    <option value="{{ $golongan->id }}" 
-                      {{ old('golongan_id', $golongan->golongan_id) == $golongan->id ? 'selected' : '' }}>
-                      {{ $golongan->nama_golongan }}</option>
-                  @endforeach
+              <label for="golongan_id" class="form-label">Golongan</label>
+              <select id="golongan_id" name="golongan_id" class="form-control" required>
+                <option value="">-- Pilih Golongan --</option>
+                @foreach ($golongans as $golongan)
+                    <option value="{{ $golongan->id }}"{{ $ketentuanUsia->golongan_id == $golongan->id ? 'selected' : '' }}>{{ $golongan->nama }}</option>
+                @endforeach
               </select>
             </div>
             <div class="form-group">
               <label for="usia_minimal">Usia Minimal</label>
-              <input type="date" class="form-control" name="usia_minimal" placeholder="Silakan Masukan Usia Minimal">
+              <input type="date" class="form-control" name="min_usia" placeholder="Silakan Masukan Usia Minimal">
             </div>
             <div class="form-group">
               <label for="usia_maksimal">Usia Maksimal</label>
-              <input type="date" class="form-control" name="usia_maksimal" placeholder="Silakan Masukan Usia Maksimal">
+              <input type="date" class="form-control" name="max_usia" placeholder="Silakan Masukan Usia Maksimal">
             </div>
               <div class="card-footer">
                 <button type="submit" class="btn btn-primary">Submit</button>
                 <a class="btn btn-success" href="{{ route('ketentuanusia.index')}}">Kembali</a>
               </div>
       </form>
+      <script>
+        // Mengambil Golongan berdasarkan Cabang yang dipilih
+        document.getElementById('cabang_id').addEventListener('change', function() {
+            let cabang_id = this.value;
+            if (cabang_id) {
+                fetch(`/get-golongan/${cabang_id}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        let golonganSelect = document.getElementById('golongan_id');
+                        golonganSelect.innerHTML = "<option value=''>Pilih Golongan</option>";
+                        data.forEach(golongan => {
+                            golonganSelect.innerHTML += `<option value="${golongan.id}">${golongan.nama}</option>`;
+                        });
+                    });
+            }
+        });
+      </script>
               <!-- /.card -->
             </div>
             <!-- /.col -->
@@ -68,6 +83,7 @@
           <!-- /.row -->
         </div>
         <!-- /.container-fluid -->
+
 </section>
 
 @endsection

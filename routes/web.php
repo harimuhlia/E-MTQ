@@ -4,7 +4,6 @@ use App\Http\Controllers\CabangController;
 use App\Http\Controllers\DesaController;
 use App\Http\Controllers\GolonganController;
 use App\Http\Controllers\KetentuanusiaController;
-use App\Http\Controllers\KetentuanUsiaController as ControllersKetentuanUsiaController;
 use App\Http\Controllers\PendaftaranController;
 use App\Http\Controllers\TahuneventController;
 use Illuminate\Support\Facades\Auth;

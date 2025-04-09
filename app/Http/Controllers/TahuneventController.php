@@ -15,7 +15,6 @@ class TahuneventController extends Controller
     public function index()
     {
         $tahunevents = Tahunevent::all();
-
         return view("tahun_event.index", compact('tahunevents'));
     }
 
@@ -112,4 +111,5 @@ class TahuneventController extends Controller
 
         return redirect()->route('tahunevent.index')->with('success', 'Data berhasil dihapus!');
     }
+
 }

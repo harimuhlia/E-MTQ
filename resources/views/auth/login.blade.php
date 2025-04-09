@@ -55,6 +55,23 @@
             </div>
           </div>
         </div>
+        <div class="input-group mb-3">
+          <select name="cabang_id" id="tahun_event" class="form-control @error('tahun_event') is-invalid @enderror" required>
+            <option value="">Tahun Event</option>
+            <option value="">2024-2025</option>
+            <option value="">2023-2024</option>
+        </select>
+          @error('tahun_event')
+              <span class="invalid-feedback" role="alert">
+                  <strong>{{ $message }}</strong>
+              </span>
+          @enderror
+        <div class="input-group-append">
+          <div class="input-group-text">
+            <span class="fas fa-lock"></span>
+          </div>
+        </div>
+      </div>
         <div class="row">
           <div class="col-8">
             <div class="icheck-primary">
