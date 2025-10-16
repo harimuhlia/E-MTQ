@@ -29,13 +29,13 @@
                 </tr>
                 </thead>
                 <tbody> 
-                  @foreach ($ketentuanUsia as $item)
+                   @foreach($ketentuanusias as $item)
                   <tr>
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $item->cabang->nama }}</td>
                     <td>{{ $item->golongan->nama }}</td>
-                    <td>{{ $item->min_usia }}</td>
-                    <td>{{ $item->max_usia }}</td>
+                    <td>{{ $item->min_usia->format('d-m-Y') }}</td>
+                    <td>{{ $item->max_usia->format('d-m-Y') }}</td>
                     <td>
                         @php
                             $minimal = \Carbon\Carbon::parse($item->min_usia);
@@ -51,7 +51,7 @@
                       <form action="{{ route('ketentuanusia.destroy', $item->id) }}" method="post">
                         @csrf
                         @method('delete')
-                        <a href="{{ route('ketentuanusia.show', $item->id) }}" class="btn btn-primary btn-xs"><i class="fas fa-eye"></i> Detail</a>
+                        {{-- <a href="{{ route('ketentuanusia.show', $item->id) }}" class="btn btn-primary btn-xs"><i class="fas fa-eye"></i> Detail</a> --}}
                         <a href="{{ route('ketentuanusia.edit', $item->id) }}" class="btn btn-warning btn-xs"><i class="fas fa-edit"></i> Edit</a>
                         @if (Auth()->user()->role == 'admin_global')
                         <button class="btn btn-danger btn-xs" onclick="return confirm('Are you sure you want to delete the record {{ $item->id }} ?')"><i class="fas fa-trash-alt"></i> Hapus</button>

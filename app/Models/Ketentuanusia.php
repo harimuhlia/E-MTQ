@@ -12,7 +12,12 @@ class KetentuanUsia extends Model
     protected $table = 'ketentuanusia';
 
     protected $fillable = [
-        'cabang_id', 'golongan_id', 'min_usia', 'max_usia',
+    'cabang_id', 'golongan_id', 'min_usia', 'max_usia',
+    ];
+
+    protected $casts = [
+        'min_usia' => 'date',
+        'max_usia' => 'date',
     ];
 
     /**

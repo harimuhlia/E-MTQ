@@ -6,6 +6,9 @@
   <title>E-MTQ | @yield('title')</title>
 
   @include('layouts.style')
+  <div class="preloader flex-column justify-content-center align-items-center">
+    <img class="animation__wobble" src="{{ asset('AdminLTE') }}/dist/img/AdminLTELogo.png" alt="AdminLTELogo" height="60" width="60">
+  </div>
 </head>
 <!--
 `body` tag options:

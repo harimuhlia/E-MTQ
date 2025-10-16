@@ -9,75 +9,130 @@ use Illuminate\Http\Request;
 
 class KetentuanUsiaController extends Controller
 {
-    // Menampilkan semua data ketentuan usia
     public function index()
     {
-        $ketentuanUsia = KetentuanUsia::with(['cabang', 'golongan'])->get();
-        return view('ketentuan_usia.index', compact('ketentuanUsia'));
+        $ketentuanusias = KetentuanUsia::with(['cabang', 'golongan'])->get();
+        return view('ketentuan_usia.index', compact('ketentuanusias'));
     }
 
-    // Menampilkan form untuk membuat ketentuan usia baru
     public function create()
     {
-        $cabangs = Cabang::all(); // Ambil semua data cabang
+        $cabangs = Cabang::all();
         return view('ketentuan_usia.create', compact('cabangs'));
     }
 
-    // Menyimpan data ketentuan usia baru
+    public function show(KetentuanUsia $ketentuanusium)
+    {
+        return view('ketentuan_usia.show', compact('ketentuanusium'));
+    }
+
+    public function edit(KetentuanUsia $ketentuanusium)
+    {
+        $cabangs = Cabang::all();
+        $golongans = Golongan::where('cabang_id', $ketentuanusium->cabang_id)->get();
+        return view('ketentuan_usia.edit', compact('ketentuanusium', 'cabangs', 'golongans'));
+    }
+
     public function store(Request $request)
-    {
-        $request->validate([
-            'cabang_id' => 'required|exists:cabangs,id',
-            'golongan_id' => 'required|exists:golongans,id',
-            'min_usia' => 'required',
-            'max_usia' => 'required',
-        ]);
-
-        KetentuanUsia::create($request->all());
-
-        return redirect()->route('ketentuanusia.index')->with('success', 'Ketentuan Usia berhasil ditambahkan');
-    }
-
-    // Menampilkan form untuk mengedit ketentuan usia
-    // public function edit(KetentuanUsia $ketentuanUsia)
-    // {
-    //     $cabangs = Cabang::all();
-    //     return view('ketentuan_usia.edit', compact('ketentuanUsia', 'cabangs'));
-    // }
-    public function edit(KetentuanUsia $ket_usia)
 {
-    $cabangs = Cabang::all();
-    $golongans = Golongan::where('cabang_id', $ket_usia->cabang_id)->get();
+    $request->validate([
+        'cabang_id' => 'required|exists:cabangs,id',
+        'golongan_id' => 'required|exists:golongans,id',
+        'min_usia' => 'required|date',
+        'max_usia' => 'required|date|after_or_equal:min_usia',
+    ]);
 
-    return view('ketentuan_usia.edit', compact('ket_usia', 'cabangs', 'golongans'));
-}
+    // 🔍 Cek apakah kombinasi cabang_id + golongan_id sudah ada
+    $exists = KetentuanUsia::where('cabang_id', $request->cabang_id)
+        ->where('golongan_id', $request->golongan_id)
+        ->exists();
 
-    // Mengupdate data ketentuan usia
-    public function update(Request $request, KetentuanUsia $ket_usia)
+    if ($exists) {
+        return redirect()->back()
+            ->withInput()
+            ->withErrors(['golongan_id' => 'Data dengan Cabang dan Golongan ini sudah ada!']);
+    }
+
+    KetentuanUsia::create([
+        'cabang_id' => $request->cabang_id,
+        'golongan_id' => $request->golongan_id,
+        'min_usia' => $request->min_usia,
+        'max_usia' => $request->max_usia,
+    ]);
+
+    return redirect()->route('ketentuanusia.index')->with('success', 'Data Ketentuan Usia berhasil ditambahkan.');
+    }
+
+
+    public function update(Request $request, KetentuanUsia $ketentuanusium)
     {
         $request->validate([
             'cabang_id' => 'required|exists:cabangs,id',
             'golongan_id' => 'required|exists:golongans,id',
-            'min_usia' => 'required|integer',
-            'max_usia' => 'required|integer',
+            'min_usia' => 'required|date',
+            'max_usia' => 'required|date|after_or_equal:min_usia',
         ]);
 
-        $ket_usia->update($request->all());
+        // 🔍 Cek duplikasi, tapi abaikan diri sendiri (pakai where id !=)
+        $exists = KetentuanUsia::where('cabang_id', $request->cabang_id)
+            ->where('golongan_id', $request->golongan_id)
+            ->where('id', '!=', $ketentuanusium->id)
+            ->exists();
 
-        return redirect()->route('ketentuan_usia.index')->with('success', 'Ketentuan Usia berhasil diupdate');
+        if ($exists) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['golongan_id' => 'Data dengan Cabang dan Golongan ini sudah ada!']);
+        }
+
+        $ketentuanusium->update([
+            'cabang_id' => $request->cabang_id,
+            'golongan_id' => $request->golongan_id,
+            'min_usia' => $request->min_usia,
+            'max_usia' => $request->max_usia,
+        ]);
+
+        return redirect()->route('ketentuanusia.index')->with('success', 'Data Ketentuan Usia berhasil diupdate.');
     }
 
-    // Menghapus ketentuan usia
-    public function destroy(KetentuanUsia $ketentuanUsia)
+    // public function store(Request $request)
+    // {
+    //     $request->validate([
+    //         'cabang_id' => 'required|exists:cabangs,id',
+    //         'golongan_id' => 'required|exists:golongans,id',
+    //         'min_usia' => 'required|date',
+    //         'max_usia' => 'required|date|after_or_equal:min_usia',
+    //     ]);
+
+    //     KetentuanUsia::create($request->all());
+
+    //     return redirect()->route('ketentuanusia.index')->with('success', 'Data Ketentuan Usia berhasil ditambahkan.');
+    // }
+
+    // public function update(Request $request, KetentuanUsia $ketentuanusium)
+    // {
+    //     $request->validate([
+    //         'cabang_id' => 'required|exists:cabangs,id',
+    //         'golongan_id' => 'required|exists:golongans,id',
+    //         'min_usia' => 'required|date',
+    //         'max_usia' => 'required|date|after_or_equal:min_usia',
+    //     ]);
+
+    //     $ketentuanusium->update($request->all());
+
+    //     return redirect()->route('ketentuanusia.index')->with('success', 'Data Ketentuan Usia berhasil diupdate.');
+    // }
+
+    public function destroy(KetentuanUsia $ketentuanusium)
     {
-        $ketentuanUsia->delete();
-        return redirect()->route('ketentuan_usia.index')->with('success', 'Ketentuan Usia berhasil dihapus');
+        $ketentuanusium->delete();
+        return redirect()->route('ketentuanusia.index')->with('success', 'Data Ketentuan Usia berhasil dihapus.');
     }
 
-    // Menampilkan golongan berdasarkan cabang yang dipilih
-    public function getGolonganByCabang($cabangId)
+    // untuk AJAX
+    public function getGolonganByCabang($cabang_id)
     {
-        $golongans = Golongan::where('cabang_id', $cabangId)->get();
+        $golongans = Golongan::where('cabang_id', $cabang_id)->pluck('nama', 'id');
         return response()->json($golongans);
     }
 }

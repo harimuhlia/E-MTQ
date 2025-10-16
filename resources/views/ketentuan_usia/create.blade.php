@@ -21,23 +21,43 @@
         </ul>
     </div>
   @endif
-      <form action="{{ route('ketentuanusia.store') }}" method="POST">
-      @csrf
+      <form action="{{ isset($ketentuanusium) ? route('ketentuanusia.update', $ketentuanusium->id) : route('ketentuanusia.store') }}" method="POST">
+        @csrf
+        @if(isset($ketentuanusium))
+            @method('PUT')
+        @endif
       <div class="card-body">
             <div class="form-group">
               <label for="nama_cabang_usia">Cabang Lomba</label>
-              <select name="cabang_id" id="cabang_id" class="form-control" required>
-                <option value="">Pilih Cabang Lomba</option>
-                @foreach ($cabangs as $cabang)
-                <option value="{{ $cabang->id }}">{{ $cabang->nama }}</option>
+              <select name="cabang_id" id="cabang_id" class="form-control @error('cabang_id') is-invalid @enderror" required>
+                <option value="">-- Pilih Cabang --</option>
+                @foreach($cabangs as $cabang)
+                    <option value="{{ $cabang->id }}"
+                        {{ old('cabang_id', isset($ketentuanusium) ? $ketentuanusium->cabang_id : '') == $cabang->id ? 'selected' : '' }}>
+                        {{ $cabang->nama }}
+                    </option>
                 @endforeach
-              </select>
+            </select>
+            @error('cabang_id')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
             </div>
             <div class="form-group">
               <label for="golongan_id" class="form-label">Golongan</label>
-            <select class="form-control" id="golongan_id" name="golongan_id" required>
-                <option value="">Pilih Golongan</option>
+            <select name="golongan_id" id="golongan_id" class="form-control @error('golongan_id') is-invalid @enderror" required>
+                <option value="">-- Pilih Golongan --</option>
+                @if(isset($golongans))
+                    @foreach($golongans as $golongan)
+                        <option value="{{ $golongan->id }}"
+                            {{ old('golongan_id', isset($ketentuanusium) ? $ketentuanusium->golongan_id : '') == $golongan->id ? 'selected' : '' }}>
+                            {{ $golongan->nama }}
+                        </option>
+                    @endforeach
+                @endif
             </select>
+            @error('golongan_id')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
             </div>
             <div class="form-group">
               <label for="usia_minimal">Usia Minimal</label>
@@ -52,31 +72,26 @@
                 <a class="btn btn-success" href="{{ route('ketentuanusia.index')}}">Kembali</a>
               </div>
       </form>
-      <script>
-        // Mengambil Golongan berdasarkan Cabang yang dipilih
-        document.getElementById('cabang_id').addEventListener('change', function() {
-            let cabang_id = this.value;
-            if (cabang_id) {
-                fetch(`/get-golongan/${cabang_id}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        let golonganSelect = document.getElementById('golongan_id');
-                        golonganSelect.innerHTML = "<option value=''>Pilih Golongan</option>";
-                        data.forEach(golongan => {
-                            golonganSelect.innerHTML += `<option value="${golongan.id}">${golongan.nama}</option>`;
-                        });
-                    });
+      {{-- AJAX untuk menampilkan golongan berdasarkan cabang --}}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$('#cabang_id').on('change', function () {
+    var cabang_id = $(this).val();
+    if (cabang_id) {
+        $.ajax({
+            url: '/get-golongan/' + cabang_id,
+            type: 'GET',
+            success: function (data) {
+                $('#golongan_id').empty();
+                $('#golongan_id').append('<option value="">-- Pilih Golongan --</option>');
+                $.each(data, function (key, value) {
+                    $('#golongan_id').append('<option value="' + key + '">' + value + '</option>');
+                });
             }
         });
-      </script>
-              <!-- /.card -->
-            </div>
-            <!-- /.col -->
-          </div>
-          <!-- /.row -->
-        </div>
-        <!-- /.container-fluid -->
-
+    }
+});
+</script>
 </section>
 
 @endsection
