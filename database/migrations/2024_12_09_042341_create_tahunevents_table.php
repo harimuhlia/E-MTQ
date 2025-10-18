@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('tahunevents', function (Blueprint $table) {
             $table->id();
-            $table->string('tahun_event');
+            $table->integer('tahun_event')->unique();
             $table->string('slug')->unique();
             $table->timestamps();
         });
