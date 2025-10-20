@@ -23,7 +23,12 @@ class User extends Authenticatable
         'password',
         'role',
         'tahunpelaksanaan',
-        'terms'
+        'terms',
+        'desa_id',
+        'user_id',
+        'tanggal_lahir',
+        'nik',
+        'foto',
     ];
 
     /**

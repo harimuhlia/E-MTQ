@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->integer('tahun_event')->unique();
             $table->string('slug')->unique();
+            $table->boolean('is_active');
             $table->timestamps();
         });
     }

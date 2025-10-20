@@ -15,4 +15,7 @@ class Tahunevent extends Model
     {
         return strtolower(str_replace(' ', '-', $tahun_event));
     }
+    public function detail() {
+        return $this->hasOne(\App\Models\DetailEvent::class, 'tahunevent_id');
+    }
 }
