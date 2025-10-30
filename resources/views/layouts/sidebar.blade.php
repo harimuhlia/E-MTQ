@@ -4,7 +4,7 @@
       <img src="{{ asset('AdminLTE') }}/dist/img/logolptq2.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
       <span class="brand-text font-weight-light"><strong>E-MTQ Kec.Rajeg</strong></span>
     </a>
-
+  
     <!-- Sidebar -->
     <div class="sidebar">
       <!-- Sidebar user panel (optional) -->
@@ -17,7 +17,7 @@
           <span class="text-success"><i class="fas fa-circle nav-icon"></i> Administrator</span>
         </div>
       </div>
-
+  
       <!-- SidebarSearch Form -->
       <div class="form-inline">
         <div class="input-group" data-widget="sidebar-search">
@@ -29,7 +29,7 @@
           </div>
         </div>
       </div>
-
+  
       <!-- Sidebar Menu -->
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
@@ -43,8 +43,9 @@
                   </p>
                 </a>
               </li>
-              <li class="nav-item has-treeview {{ request()->is('tahunevent*') || request()->is('ketentuanusia*') || request()->is('desa*') || request()->is('golongan*') || request()->is('cabang*') ? 'menu-open' : '' }}">
-                <a href="#" class="nav-link {{ request()->is('tahunevent*') || request()->is('desa*') || request()->is('ketentuanusia*') || request()->is('golongan*') || request()->is('cabang*') ? 'active' : '' }}">
+              @if(session('selected_event_id'))
+              <li class="nav-item has-treeview {{ request()->is('tahunevent*') || request()->is('desa*') || request()->is('golongan*') || request()->is('cabang*') || request()->is('operator*') ? 'menu-open' : '' }}">
+                <a href="#" class="nav-link {{ request()->is('tahunevent*') || request()->is('desa*') || request()->is('golongan*') || request()->is('cabang*') || request()->is('operator*') ? 'active' : '' }}">
                   <i class="nav-icon far fa-id-card"></i>
                   <p>
                     Data Master
@@ -76,9 +77,17 @@
                       <p>Golongan</p>
                     </a>
                   </li>
+                  <li class="nav-item">
+                    <a href="{{ route('operator.index')}}" class="nav-link {{ (request()->is('operator*')) ? 'active' : '' }}">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>Data Operator</p>
+                    </a>
+                  </li>
                 </ul>
               </li>
-              <li class="nav-item">
+              @endif
+              @if(session('selected_event_id'))
+              <li class="nav-item has-treeview">
                 <a href="#" class="nav-link">
                   <i class="nav-icon far fa-id-card"></i>
                   <p>
@@ -107,6 +116,8 @@
                   </li>
                 </ul>
               </li>
+              @endif
+          @if(session('selected_event_id'))
           <li class="nav-item">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-tachometer-alt"></i>
@@ -115,6 +126,7 @@
               </p>
             </a>
           </li>
+          @endif
           <li class="nav-header">PENGATURAN</li>
           <li class="nav-item">
             <a href="#" class="nav-link">
@@ -132,9 +144,9 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="{{ route('operator.index') }}" class="nav-link {{ request()->is('operator*') ? 'active' : '' }}">
                   <i class="far fa-circle nav-icon"></i>
-                  <p>Tambah Pengguna</p>
+                  <p>Data Operator</p>
                 </a>
               </li>
             </ul>

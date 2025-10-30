@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\EventParticipant;
+use App\Models\Desa;
 
 class User extends Authenticatable
 {
@@ -58,5 +59,13 @@ class User extends Authenticatable
     public function eventParticipants()
     {
         return $this->hasMany(EventParticipant::class);
+    }
+
+    /**
+     * Relasi ke desa tempat pengguna terdaftar.
+     */
+    public function desa()
+    {
+        return $this->belongsTo(Desa::class);
     }
 }
