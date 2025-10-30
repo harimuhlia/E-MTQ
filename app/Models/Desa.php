@@ -9,5 +9,6 @@ class Desa extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nama_desa'];
+    // Menggunakan kolom 'nama' pada tabel desas
+    protected $fillable = ['nama'];
 }

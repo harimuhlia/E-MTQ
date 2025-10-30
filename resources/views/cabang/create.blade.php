@@ -23,17 +23,25 @@
   @endif
   <form action="{{ route('cabang.store')}}" enctype="multipart/form-data" method="POST">
     @csrf
-  <form>
     <div class="card-body">
+        <div class="form-group">
+            <label for="tahunevent_id">Tahun Event</label>
+            <select name="tahunevent_id" class="form-control" required>
+                <option value="">Pilih Tahun Event</option>
+                @foreach ($tahunevents as $event)
+                    <option value="{{ $event->id }}">{{ $event->tahun_event }}</option>
+                @endforeach
+            </select>
+        </div>
         <div class="form-group">
             <label for="nama">Nama Cabang</label>
             <input type="text" class="form-control" name="nama" placeholder="Silakan Masukan Nama Cabang">
         </div>
     <div class="card-footer">
-    <button type="submit" class="btn btn-primary">Submit</button>
-    <a class="btn btn-success" href="{{ route('cabang.index')}}">Kembali</a>
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <a class="btn btn-success" href="{{ route('cabang.index')}}">Kembali</a>
     </div>
-    </form>
+  </form>
               <!-- /.card -->
             </div>
             <!-- /.col -->

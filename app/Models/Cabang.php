@@ -11,7 +11,23 @@ class Cabang extends Model
 
     protected $table = 'cabangs';
 
+    /**
+     * Atribut yang boleh diisi secara massal.
+     *
+     * - nama: nama cabang lomba
+     * - tahunevent_id: ID tahun event yang menjadi induk cabang
+     */
     protected $fillable = [
-        'nama', 'alamat', 'telepon',
+        'nama',
+        'tahunevent_id',
     ];
+
+    /**
+     * Relasi ke Tahun Event.
+     * Setiap cabang terkait dengan satu tahun event.
+     */
+    public function tahunevent()
+    {
+        return $this->belongsTo(Tahunevent::class);
+    }
 }

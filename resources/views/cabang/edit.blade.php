@@ -24,17 +24,24 @@
   <form action="{{ route('cabang.update', $cabang->id)}}" method="POST">
     @csrf
     @method('PUT')
-  <form>
     <div class="card-body">
+        <div class="form-group">
+            <label for="tahunevent_id">Tahun Event</label>
+            <select name="tahunevent_id" class="form-control" required>
+                @foreach ($tahunevents as $event)
+                <option value="{{ $event->id }}" {{ $cabang->tahunevent_id == $event->id ? 'selected' : '' }}>{{ $event->tahun_event }}</option>
+                @endforeach
+            </select>
+        </div>
         <div class="form-group">
             <label for="nama">Nama Cabang</label>
             <input type="text" class="form-control" name="nama" id="nama" value="{{ $cabang->nama }}">
         </div>
     <div class="card-footer">
-    <button type="submit" class="btn btn-primary">Submit</button>
-    <a class="btn btn-success" href="{{ route('cabang.index')}}">Kembali</a>
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <a class="btn btn-success" href="{{ route('cabang.index')}}">Kembali</a>
     </div>
-    </form>
+  </form>
               <!-- /.card -->
             </div>
             <!-- /.col -->

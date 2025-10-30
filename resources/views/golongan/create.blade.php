@@ -37,6 +37,10 @@
             <label for="nama">Golongan</label>
             <input type="text" class="form-control" name="nama" id="nama_golongan" placeholder="Silakan Masukan Nama Golongan">
         </div>
+        <div class="form-group">
+            <label for="max_usia">Usia Maksimal (tahun)</label>
+            <input type="number" class="form-control" name="max_usia" id="max_usia" placeholder="Contoh: 18" min="0">
+        </div>
     <div class="card-footer">
     <button type="submit" class="btn btn-primary">Submit</button>
     <a class="btn btn-success" href="{{ route('golongan.index')}}">Kembali</a>

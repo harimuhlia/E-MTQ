@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\EventParticipant;
 
 class User extends Authenticatable
 {
@@ -49,4 +50,13 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Relasi ke tabel event_participants.
+     * Menandakan bahwa seorang pengguna dapat terdaftar di banyak event.
+     */
+    public function eventParticipants()
+    {
+        return $this->hasMany(EventParticipant::class);
+    }
 }

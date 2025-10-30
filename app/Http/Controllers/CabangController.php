@@ -10,14 +10,17 @@ class CabangController extends Controller
     // Menampilkan semua data cabang
     public function index()
     {
-        $cabang = Cabang::all();
+        // Muat relasi tahun event untuk menampilkan nama tahun pada tabel
+        $cabang = Cabang::with('tahunevent')->get();
         return view('cabang.index', compact('cabang'));
     }
 
     // Menampilkan form untuk membuat cabang baru
     public function create()
     {
-        return view('cabang.create');
+        // Ambil seluruh tahun event untuk pemilihan event saat membuat cabang
+        $tahunevents = \App\Models\Tahunevent::all();
+        return view('cabang.create', compact('tahunevents'));
     }
 
     // Menyimpan data cabang baru
@@ -25,9 +28,14 @@ class CabangController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:255',
+            'tahunevent_id' => 'required|exists:tahunevents,id',
         ]);
 
-        Cabang::create($request->all());
+        // Hanya input field yang relevan
+        Cabang::create([
+            'nama' => $request->nama,
+            'tahunevent_id' => $request->tahunevent_id,
+        ]);
 
         return redirect()->route('cabang.index')->with('success', 'Cabang berhasil ditambahkan');
     }
@@ -41,7 +49,8 @@ class CabangController extends Controller
     // Menampilkan form untuk mengedit cabang
     public function edit(Cabang $cabang)
     {
-        return view('cabang.edit', compact('cabang'));
+        $tahunevents = \App\Models\Tahunevent::all();
+        return view('cabang.edit', compact('cabang', 'tahunevents'));
     }
 
     // Mengupdate data cabang
@@ -49,9 +58,13 @@ class CabangController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:255',
+            'tahunevent_id' => 'required|exists:tahunevents,id',
         ]);
 
-        $cabang->update($request->all());
+        $cabang->update([
+            'nama' => $request->nama,
+            'tahunevent_id' => $request->tahunevent_id,
+        ]);
 
         return redirect()->route('cabang.index')->with('success', 'Cabang berhasil diupdate');
     }

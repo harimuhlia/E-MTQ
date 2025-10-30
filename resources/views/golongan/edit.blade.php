@@ -24,7 +24,6 @@
   <form action="{{ route('golongan.update', $golongan->id) }}" method="POST">
     @csrf
     @method('PUT')
-  <form>
     <div class="card-body">
         <div class="form-group">
             <label for="kode_golongan">Cabang</label>
@@ -37,6 +36,10 @@
         <div class="form-group">
             <label for="nama">Golongan</label>
             <input type="text" class="form-control" name="nama" value="{{ $golongan->nama }}">
+        </div>
+        <div class="form-group">
+            <label for="max_usia">Usia Maksimal (tahun)</label>
+            <input type="number" class="form-control" name="max_usia" id="max_usia" value="{{ $golongan->max_usia }}" min="0">
         </div>
     <div class="card-footer">
     <button type="submit" class="btn btn-primary">Submit</button>

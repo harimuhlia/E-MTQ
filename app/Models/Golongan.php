@@ -12,7 +12,9 @@ class Golongan extends Model
     protected $table = 'golongans';
 
     protected $fillable = [
-        'nama', 'cabang_id',
+        'nama',
+        'cabang_id',
+        'max_usia',
     ];
 
     /**

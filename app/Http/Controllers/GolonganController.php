@@ -28,9 +28,14 @@ class GolonganController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'cabang_id' => 'required|exists:cabangs,id',
+            'max_usia' => 'nullable|integer|min:0',
         ]);
 
-        Golongan::create($request->all());
+        Golongan::create([
+            'nama' => $request->nama,
+            'cabang_id' => $request->cabang_id,
+            'max_usia' => $request->max_usia,
+        ]);
 
         return redirect()->route('golongan.index')->with('success', 'Golongan berhasil ditambahkan');
     }
@@ -54,9 +59,14 @@ class GolonganController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'cabang_id' => 'required|exists:cabangs,id',
+            'max_usia' => 'nullable|integer|min:0',
         ]);
 
-        $golongan->update($request->all());
+        $golongan->update([
+            'nama' => $request->nama,
+            'cabang_id' => $request->cabang_id,
+            'max_usia' => $request->max_usia,
+        ]);
 
         return redirect()->route('golongan.index')->with('success', 'Golongan berhasil diupdate');
     }

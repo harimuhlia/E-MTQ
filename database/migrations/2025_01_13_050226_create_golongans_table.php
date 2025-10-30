@@ -15,8 +15,12 @@ return new class extends Migration
     {
         Schema::create('golongans', function (Blueprint $table) {
             $table->id();
-            $table->string('nama'); // Nama golongan
+            // Nama golongan, misal "Surah Al-Falaq", "Surah Al-Quraisy", dsb.
+            $table->string('nama');
+            // Relasi ke cabang (tiap golongan merupakan bagian dari sebuah cabang tertentu)
             $table->foreignId('cabang_id')->constrained('cabangs')->onDelete('cascade');
+            // Batas usia maksimal peserta untuk golongan ini (dalam tahun). Nullable karena beberapa golongan mungkin tidak memiliki batas khusus.
+            $table->integer('max_usia')->nullable();
             $table->timestamps();
         });
     }

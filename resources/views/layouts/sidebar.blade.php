@@ -4,7 +4,7 @@
       <img src="{{ asset('AdminLTE') }}/dist/img/logolptq2.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
       <span class="brand-text font-weight-light"><strong>E-MTQ Kec.Rajeg</strong></span>
     </a>
-  
+
     <!-- Sidebar -->
     <div class="sidebar">
       <!-- Sidebar user panel (optional) -->
@@ -17,7 +17,7 @@
           <span class="text-success"><i class="fas fa-circle nav-icon"></i> Administrator</span>
         </div>
       </div>
-  
+
       <!-- SidebarSearch Form -->
       <div class="form-inline">
         <div class="input-group" data-widget="sidebar-search">
@@ -29,7 +29,7 @@
           </div>
         </div>
       </div>
-  
+
       <!-- Sidebar Menu -->
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
@@ -74,12 +74,6 @@
                     <a href="{{ route('golongan.index')}}" class="nav-link {{ (request()->is('golongan*')) ? 'active' : '' }}">
                       <i class="far fa-circle nav-icon"></i>
                       <p>Golongan</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="{{ route('ketentuanusia.index')}}" class="nav-link {{ (request()->is('ketentuanusia*')) ? 'active' : '' }}">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Ketentuan Usia</p>
                     </a>
                   </li>
                 </ul>
