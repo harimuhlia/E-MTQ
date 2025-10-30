@@ -1,14 +1,15 @@
 @extends('layouts.app')
+
 @section('title', 'Dashboard')
 
 @section('content')
 <section class="content">
   <div class="container-fluid">
     @if (session('selected_event_id') && isset($selectedEvent))
-      <!-- Event-specific dashboard -->
+      <!-- Dashboard untuk event terpilih -->
       <div class="row mb-3">
         <div class="col-12 d-flex justify-content-between align-items-center">
-          <h4>Event Terpilih: {{ $selectedEvent->tahun_event }}</h4>
+          <h4>Event Terpilih: {{ $selectedEvent->nama_kegiatan_aktif }}</h4>
           <a href="{{ route('home.select_event', 0) }}" class="btn btn-secondary btn-sm">Pilih Event Lain</a>
         </div>
       </div>
@@ -51,69 +52,93 @@
         </div>
       </div>
 
+      <!-- Detail jadwal event -->
       <div class="row mt-4">
         <div class="col-md-8">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Jadwal Pendaftaran</h3>
+              <h3 class="card-title">Jadwal Event</h3>
             </div>
             <div class="card-body">
-              @if($selectedEvent->detail)
-                <ul>
-                  <li><strong>Nama Kegiatan:</strong> {{ $selectedEvent->detail->nama_kegiatan_aktif }}</li>
-                  <li><strong>Waktu Pelaksanaan:</strong>
-                    {{ optional($selectedEvent->detail->waktu_pelaksanaan_mulai)->translatedFormat('d F Y') }} -
-                    {{ optional($selectedEvent->detail->waktu_pelaksanaan_selesai)->translatedFormat('d F Y') }}
-                  </li>
-                  <li><strong>Tempat:</strong> {{ $selectedEvent->detail->tempat_pelaksanaan }}</li>
-                  <li><strong>Pendaftaran:</strong>
-                    {{ optional($selectedEvent->detail->pendaftaran_mulai)->translatedFormat('d F Y H:i') }} -
-                    {{ optional($selectedEvent->detail->pendaftaran_selesai)->translatedFormat('d F Y H:i') }}
-                  </li>
-                  <li><strong>Verifikasi Tahap 1:</strong>
-                    {{ optional($selectedEvent->detail->verif1_mulai)->translatedFormat('d F Y H:i') }} -
-                    {{ optional($selectedEvent->detail->verif1_selesai)->translatedFormat('d F Y H:i') }}
-                  </li>
-                  <li><strong>Verifikasi Tahap 2:</strong>
-                    {{ optional($selectedEvent->detail->verif2_mulai)->translatedFormat('d F Y H:i') }} -
-                    {{ optional($selectedEvent->detail->verif2_selesai)->translatedFormat('d F Y H:i') }}
-                  </li>
-                  <li><strong>Masa Sanggah:</strong>
-                    {{ optional($selectedEvent->detail->sanggah_mulai)->translatedFormat('d F Y H:i') }} -
-                    {{ optional($selectedEvent->detail->sanggah_selesai)->translatedFormat('d F Y H:i') }}
-                  </li>
-                  <li><strong>Pengumuman Verifikasi:</strong> {{ optional($selectedEvent->detail->pengumuman_verifikasi)->translatedFormat('d F Y H:i') }}</li>
-                  <li><strong>Technical Meeting:</strong> {{ optional($selectedEvent->detail->technical_meeting)->translatedFormat('d F Y H:i') }}</li>
-                </ul>
-              @else
-                <p class="text-muted">Detail event belum diatur.</p>
-              @endif
+              <ul class="list-unstyled">
+                <li><strong>Nama Kegiatan:</strong> {{ $selectedEvent->nama_kegiatan_aktif }}</li>
+                <li><strong>Tempat Pelaksanaan:</strong> {{ $selectedEvent->tempat_pelaksanaan ?? '-' }}</li>
+                <li><strong>Pelaksanaan:</strong>
+                  {{ optional($selectedEvent->waktu_pelaksanaan_mulai)->translatedFormat('d F Y') ?? '-' }} -
+                  {{ optional($selectedEvent->waktu_pelaksanaan_selesai)->translatedFormat('d F Y') ?? '-' }}
+                </li>
+                <li><strong>Pendaftaran:</strong>
+                  {{ optional($selectedEvent->pendaftaran_mulai)->translatedFormat('d F Y H:i') ?? '-' }} -
+                  {{ optional($selectedEvent->pendaftaran_selesai)->translatedFormat('d F Y H:i') ?? '-' }}
+                </li>
+                <li><strong>Verifikasi Tahap 1:</strong>
+                  {{ optional($selectedEvent->verif1_mulai)->translatedFormat('d F Y H:i') ?? '-' }} -
+                  {{ optional($selectedEvent->verif1_selesai)->translatedFormat('d F Y H:i') ?? '-' }}
+                </li>
+                <li><strong>Verifikasi Tahap 2:</strong>
+                  {{ optional($selectedEvent->verif2_mulai)->translatedFormat('d F Y H:i') ?? '-' }} -
+                  {{ optional($selectedEvent->verif2_selesai)->translatedFormat('d F Y H:i') ?? '-' }}
+                </li>
+                <li><strong>Masa Sanggah:</strong>
+                  {{ optional($selectedEvent->sanggah_mulai)->translatedFormat('d F Y H:i') ?? '-' }} -
+                  {{ optional($selectedEvent->sanggah_selesai)->translatedFormat('d F Y H:i') ?? '-' }}
+                </li>
+                <li><strong>Pengumuman Verifikasi:</strong>
+                  {{ optional($selectedEvent->pengumuman_verifikasi)->translatedFormat('d F Y H:i') ?? '-' }}
+                </li>
+                <li><strong>Technical Meeting:</strong>
+                  {{ optional($selectedEvent->technical_meeting)->translatedFormat('d F Y H:i') ?? '-' }}
+                </li>
+              </ul>
             </div>
           </div>
         </div>
       </div>
     @else
-      <!-- Event selection list -->
+      <!-- Daftar event dengan filter tahun -->
       <div class="row mb-3">
         <div class="col-12 d-flex justify-content-between align-items-center">
-          <h4>Pilih Tahun Event</h4>
-          <a href="{{ route('tahunevent.create') }}" class="btn btn-primary">Buat Event Baru</a>
+          <h4>Daftar Event</h4>
+          <a href="{{ route('event.create') }}" class="btn btn-primary">Buat Event Baru</a>
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-12 col-md-4">
+          <form method="GET" action="{{ route('home') }}">
+            <div class="form-group">
+              <label for="year">Filter Tahun</label>
+              <select name="year" id="year" class="form-control" onchange="this.form.submit()">
+                <option value="">Semua Tahun</option>
+                @foreach($years as $yr)
+                  <option value="{{ $yr }}" {{ (isset($year) && $year == $yr) ? 'selected' : '' }}>{{ $yr }}</option>
+                @endforeach
+              </select>
+            </div>
+          </form>
         </div>
       </div>
       <div class="row">
-        @forelse($events as $event)
-          <div class="col-md-3 col-sm-6 mb-3">
-            <div class="card {{ $event->is_active ? 'bg-light border-success' : 'bg-light' }}">
+        @forelse($filteredEvents as $event)
+          <div class="col-md-4 col-sm-6 mb-3">
+            <div class="card border-{{ $event->statusClass() }}">
               <div class="card-body">
-                <h5 class="card-title">{{ $event->tahun_event }}</h5>
-                <p>Status: {{ $event->is_active ? 'Aktif' : 'Selesai' }}</p>
-                <a href="{{ route('home.select_event', $event->id) }}" class="btn btn-primary btn-sm">Kelola Event</a>
+                <h5 class="card-title">{{ $event->nama_kegiatan_aktif }}</h5>
+                <p class="mb-1"><small class="text-muted">Pendaftaran:</small></p>
+                <p class="mb-2">
+                  <small>
+                    {{ optional($event->pendaftaran_mulai)->translatedFormat('d M Y H:i') ?? '-' }}
+                    &ndash;
+                    {{ optional($event->pendaftaran_selesai)->translatedFormat('d M Y H:i') ?? '-' }}
+                  </small>
+                </p>
+                <p class="mb-2">Status: <span class="badge badge-{{ $event->statusClass() }}">{{ $event->status() }}</span></p>
+                <a href="{{ route('home.event', $event->slug) }}" class="btn btn-primary btn-sm">Kelola Event</a>
               </div>
             </div>
           </div>
         @empty
           <div class="col-12">
-            <p class="text-muted">Belum ada data event. Klik tombol "Buat Event Baru" untuk membuatnya.</p>
+            <p class="text-muted">Belum ada event untuk tahun ini.</p>
           </div>
         @endforelse
       </div>

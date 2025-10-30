@@ -33,106 +33,44 @@
       <!-- Sidebar Menu -->
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-          <!-- Add icons to the links using the .nav-icon class
-               with font-awesome or any other icon font library -->
-               <li class="nav-item">
-                <a href="{{ route('home')}}" class="nav-link {{ (request()->is('home*')) ? 'active' : '' }}">
-                  <i class="nav-icon fas fa-tachometer-alt"></i>
-                  <p>
-                    Dashboard
-                  </p>
-                </a>
-              </li>
-              @if(session('selected_event_id'))
-              <li class="nav-item has-treeview {{ request()->is('tahunevent*') || request()->is('desa*') || request()->is('golongan*') || request()->is('cabang*') || request()->is('operator*') ? 'menu-open' : '' }}">
-                <a href="#" class="nav-link {{ request()->is('tahunevent*') || request()->is('desa*') || request()->is('golongan*') || request()->is('cabang*') || request()->is('operator*') ? 'active' : '' }}">
-                  <i class="nav-icon far fa-id-card"></i>
-                  <p>
-                    Data Master
-                    <i class="fas fa-angle-left right"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="{{ route('tahunevent.index')}}" class="nav-link {{ request()->is('tahunevent*') ? 'active' : '' }}">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Data Tahun</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="{{ route('desa.index')}}" class="nav-link {{ (request()->is('desa*')) ? 'active' : '' }}">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Data Desa</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="{{ route('cabang.index')}}" class="nav-link {{ (request()->is('cabang*')) ? 'active' : '' }}">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>No. Cabang</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="{{ route('golongan.index')}}" class="nav-link {{ (request()->is('golongan*')) ? 'active' : '' }}">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Golongan</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="{{ route('operator.index')}}" class="nav-link {{ (request()->is('operator*')) ? 'active' : '' }}">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Data Operator</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-              @endif
-              @if(session('selected_event_id'))
-              <li class="nav-item has-treeview">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon far fa-id-card"></i>
-                  <p>
-                    Pendaftaran
-                    <i class="fas fa-angle-left right"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Form Daftar</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Verifikasi Pendaftar</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>List Peserta</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-              @endif
-          @if(session('selected_event_id'))
           <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="{{ route('home') }}" class="nav-link {{ request()->is('home*') ? 'active' : '' }}">
               <i class="nav-icon fas fa-tachometer-alt"></i>
-              <p>
-                Pengumuman
-              </p>
+              <p>Dashboard</p>
             </a>
           </li>
-          @endif
-          <li class="nav-header">PENGATURAN</li>
-          <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="nav-icon far fa-id-card"></i>
+
+          @if(session('selected_event_id'))
+          <!-- Data Master: muncul hanya jika event telah dipilih -->
+          <li class="nav-item has-treeview {{ request()->is('cabang*') || request()->is('golongan*') ? 'menu-open' : '' }}">
+            <a href="#" class="nav-link {{ request()->is('cabang*') || request()->is('golongan*') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-database"></i>
               <p>
-                User/ Pengguna
+                Data Master
+                <i class="fas fa-angle-left right"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{{ route('cabang.index') }}" class="nav-link {{ request()->is('cabang*') ? 'active' : '' }}">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Cabang</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{ route('golongan.index') }}" class="nav-link {{ request()->is('golongan*') ? 'active' : '' }}">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Golongan</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          <!-- Pendaftaran -->
+          <li class="nav-item has-treeview">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-edit"></i>
+              <p>
+                Pendaftaran
                 <i class="fas fa-angle-left right"></i>
               </p>
             </a>
@@ -140,7 +78,47 @@
               <li class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
-                  <p>Profil Pengguna</p>
+                  <p>Form Daftar</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Verifikasi Pendaftar</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>List Peserta</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          <!-- Pengumuman -->
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-bullhorn"></i>
+              <p>Pengumuman</p>
+            </a>
+          </li>
+          @endif
+
+          <li class="nav-header">PENGATURAN</li>
+          <!-- Kelompok Desa: kelola desa dan operator -->
+          <li class="nav-item has-treeview {{ request()->is('desa*') || request()->is('operator*') ? 'menu-open' : '' }}">
+            <a href="#" class="nav-link {{ request()->is('desa*') || request()->is('operator*') ? 'active' : '' }}">
+              <i class="nav-icon far fa-id-card"></i>
+              <p>
+                Desa
+                <i class="fas fa-angle-left right"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{{ route('desa.index') }}" class="nav-link {{ request()->is('desa*') ? 'active' : '' }}">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Data Desa</p>
                 </a>
               </li>
               <li class="nav-item">
@@ -151,11 +129,14 @@
               </li>
             </ul>
           </li>
-          <form id="logout-form" action="{{ route('logout') }}" method="POST" onclick="event.preventDefault();
-            document.getElementById('logout-form').submit();" class="nav-link">
-            <button type="button" class="btn btn-block btn-danger btn-sm" id="logout-form"><i class="fas fa-sign-out-alt"></i> KELUAR</button>
-            {{ csrf_field() }}
+
+          <!-- Logout button -->
+          <li class="nav-item">
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-inline">
+              @csrf
+              <button type="submit" class="btn btn-block btn-danger btn-sm"><i class="fas fa-sign-out-alt"></i> KELUAR</button>
             </form>
+          </li>
         </ul>
       </nav>
       <!-- /.sidebar-menu -->

@@ -25,14 +25,7 @@
     @csrf
     @method('PUT')
     <div class="card-body">
-        <div class="form-group">
-            <label for="tahunevent_id">Tahun Event</label>
-            <select name="tahunevent_id" class="form-control" required>
-                @foreach ($tahunevents as $event)
-                <option value="{{ $event->id }}" {{ $cabang->tahunevent_id == $event->id ? 'selected' : '' }}>{{ $event->tahun_event }}</option>
-                @endforeach
-            </select>
-        </div>
+        {{-- Event diambil dari session. Tidak perlu memilih event di sini. --}}
         <div class="form-group">
             <label for="nama">Nama Cabang</label>
             <input type="text" class="form-control" name="nama" id="nama" value="{{ $cabang->nama }}">

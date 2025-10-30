@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('cabangs', function (Blueprint $table) {
             $table->id();
-            // Setiap cabang dikaitkan dengan tahun event tertentu
-            $table->foreignId('tahunevent_id')->constrained('tahunevents')->onDelete('cascade');
+            // Setiap cabang dikaitkan dengan detail event tertentu
+            $table->foreignId('detail_event_id')->constrained('detail_events')->onDelete('cascade');
             // Nama cabang, misal "Hafalan" atau "Tilawah"
             $table->string('nama');
             $table->timestamps();

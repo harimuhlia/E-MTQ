@@ -13,13 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('tahunevents', function (Blueprint $table) {
-            $table->id();
-            $table->integer('tahun_event')->unique();
-            $table->string('slug')->unique();
-            $table->boolean('is_active');
-            $table->timestamps();
-        });
+        // The tahunevents table has been removed. Event years are now derived from
+        // the detail_events table (via pendaftaran_mulai or waktu_pelaksanaan_mulai).
+        // Drop the table if it still exists from a previous version to avoid errors.
+        Schema::dropIfExists('tahunevents');
     }
 
     /**
@@ -29,6 +26,8 @@ return new class extends Migration
      */
     public function down()
     {
+        // Drop the table if it exists. Since the table is no longer created,
+        // this call is safe and simply ensures clean rollback.
         Schema::dropIfExists('tahunevents');
     }
 };

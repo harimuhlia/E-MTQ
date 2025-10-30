@@ -15,12 +15,12 @@ return new class extends Migration
     {
         Schema::create('detail_events', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tahunevent_id')->constrained()->cascadeOnDelete();
+            // Unique slug used for routing and identification
+            $table->string('slug')->unique();
             $table->string('nama_kegiatan_aktif');
             $table->date('waktu_pelaksanaan_mulai')->nullable();
             $table->date('waktu_pelaksanaan_selesai')->nullable();
             $table->string('tempat_pelaksanaan')->nullable();
-            $table->date('batas_umur_tanggal_patokan')->nullable();
             $table->dateTime('pendaftaran_mulai')->nullable();
             $table->dateTime('pendaftaran_selesai')->nullable();
             $table->dateTime('verif1_mulai')->nullable();

@@ -6,9 +6,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
-use App\Models\Peserta;
 use App\Models\Desa;
-use App\Models\Tahunevent;
 use App\Models\DetailEvent;
 
 class DatabaseSeeder extends Seeder
@@ -76,78 +74,50 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        Tahunevent::updateOrCreate(
-            ['tahun_event' => 2025],
-            ['slug' => 'MTQ Ke-31', 'is_active' => true]
+        // Contoh seed event (detail event). Tahun event tidak lagi disimpan terpisah.
+        // Event pertama (misal MTQ Ke-31)
+        DetailEvent::updateOrCreate(
+            ['slug' => 'mtq-ke-31'],
+            [
+                'nama_kegiatan_aktif' => 'MTQ Ke-31',
+                'waktu_pelaksanaan_mulai' => '2025-03-10',
+                'waktu_pelaksanaan_selesai' => '2025-03-14',
+                'tempat_pelaksanaan' => 'Gedung Serbaguna Kabupaten',
+                'pendaftaran_mulai' => '2025-01-10 08:00:00',
+                'pendaftaran_selesai' => '2025-01-20 23:59:00',
+                'verif1_mulai' => '2025-01-22 08:00:00',
+                'verif1_selesai' => '2025-01-24 17:00:00',
+                'verif2_mulai' => '2025-01-26 08:00:00',
+                'verif2_selesai' => '2025-01-28 17:00:00',
+                'sanggah_mulai' => '2025-01-29 08:00:00',
+                'sanggah_selesai' => '2025-01-30 17:00:00',
+                'pengumuman_verifikasi' => '2025-02-01 10:00:00',
+                'technical_meeting' => '2025-03-05 09:00:00',
+                'logo_path' => null,
+            ]
         );
 
-        Tahunevent::updateOrCreate(
-            ['tahun_event' => 2027],
-            ['slug' => 'MTQ Ke-33', 'is_active' => false]
+        // Event kedua (misal MTQ Ke-33)
+        DetailEvent::updateOrCreate(
+            ['slug' => 'mtq-ke-33'],
+            [
+                'nama_kegiatan_aktif' => 'MTQ Ke-33',
+                'waktu_pelaksanaan_mulai' => '2027-04-11',
+                'waktu_pelaksanaan_selesai' => '2027-04-15',
+                'tempat_pelaksanaan' => 'GOR Kecamatan',
+                'pendaftaran_mulai' => '2027-02-01 08:00:00',
+                'pendaftaran_selesai' => '2027-02-15 23:59:00',
+                'verif1_mulai' => '2027-02-17 08:00:00',
+                'verif1_selesai' => '2027-02-19 17:00:00',
+                'verif2_mulai' => '2027-02-21 08:00:00',
+                'verif2_selesai' => '2027-02-23 17:00:00',
+                'sanggah_mulai' => '2027-02-24 08:00:00',
+                'sanggah_selesai' => '2027-02-25 17:00:00',
+                'pengumuman_verifikasi' => '2027-03-01 10:00:00',
+                'technical_meeting' => '2027-04-07 09:00:00',
+                'logo_path' => null,
+            ]
         );
-
-        $te2025 = TahunEvent::where('tahun_event', 2025)->first();
-        $te2027 = TahunEvent::where('tahun_event', 2027)->first();
-
-        if ($te2025) {
-            DetailEvent::updateOrCreate(
-                ['tahunevent_id' => $te2025->id],
-                [
-                    'nama_kegiatan_aktif' => 'MTQ Cabang Tilawah',
-                    'waktu_pelaksanaan_mulai' => '2025-03-10',
-                    'waktu_pelaksanaan_selesai' => '2025-03-14',
-                    'tempat_pelaksanaan' => 'Gedung Serbaguna Kabupaten',
-                    'batas_umur_tanggal_patokan' => '2008-01-01',
-
-                    'pendaftaran_mulai' => '2025-01-10 08:00:00',
-                    'pendaftaran_selesai' => '2025-01-20 23:59:00',
-
-                    'verif1_mulai' => '2025-01-22 08:00:00',
-                    'verif1_selesai' => '2025-01-24 17:00:00',
-
-                    'verif2_mulai' => '2025-01-26 08:00:00',
-                    'verif2_selesai' => '2025-01-28 17:00:00',
-
-                    'sanggah_mulai' => '2025-01-29 08:00:00',
-                    'sanggah_selesai' => '2025-01-30 17:00:00',
-
-                    'pengumuman_verifikasi' => '2025-02-01 10:00:00',
-                    'technical_meeting' => '2025-03-05 09:00:00',
-
-                    'logo_path' => null,
-                ]
-            );
-        }
-
-        if ($te2027) {
-            DetailEvent::updateOrCreate(
-                ['tahunevent_id' => $te2027->id],
-                [
-                    'nama_kegiatan_aktif' => 'MTQ Cabang Hafalan',
-                    'waktu_pelaksanaan_mulai' => '2027-04-11',
-                    'waktu_pelaksanaan_selesai' => '2027-04-15',
-                    'tempat_pelaksanaan' => 'GOR Kecamatan',
-                    'batas_umur_tanggal_patokan' => '2008-01-01',
-
-                    'pendaftaran_mulai' => '2027-02-01 08:00:00',
-                    'pendaftaran_selesai' => '2027-02-15 23:59:00',
-
-                    'verif1_mulai' => '2027-02-17 08:00:00',
-                    'verif1_selesai' => '2027-02-19 17:00:00',
-
-                    'verif2_mulai' => '2027-02-21 08:00:00',
-                    'verif2_selesai' => '2027-02-23 17:00:00',
-
-                    'sanggah_mulai' => '2027-02-24 08:00:00',
-                    'sanggah_selesai' => '2027-02-25 17:00:00',
-
-                    'pengumuman_verifikasi' => '2027-03-01 10:00:00',
-                    'technical_meeting' => '2027-04-07 09:00:00',
-
-                    'logo_path' => null,
-                ]
-            );
-        }
 
     }
 }

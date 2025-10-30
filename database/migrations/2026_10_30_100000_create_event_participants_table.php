@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id();
             // Peserta yang mendaftar. Mengacu pada tabel users.
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            // Tahun event yang diikuti.
-            $table->foreignId('tahunevent_id')->constrained('tahunevents')->onDelete('cascade');
+            // Event detail yang diikuti.
+            $table->foreignId('detail_event_id')->constrained('detail_events')->onDelete('cascade');
             // Cabang lomba yang diikuti.
             $table->foreignId('cabang_id')->constrained('cabangs')->onDelete('cascade');
             // Golongan lomba yang diikuti.

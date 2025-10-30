@@ -7,20 +7,28 @@ use Illuminate\Http\Request;
 
 class CabangController extends Controller
 {
-    // Menampilkan semua data cabang
+    // Menampilkan semua data cabang untuk event terpilih
     public function index()
     {
-        // Muat relasi tahun event untuk menampilkan nama tahun pada tabel
-        $cabang = Cabang::with('tahunevent')->get();
+        // Ambil ID event yang dipilih dari sesi. Jika tidak ada, kembalikan koleksi kosong.
+        $selectedId = session('selected_event_id');
+        if ($selectedId) {
+            $cabang = Cabang::where('detail_event_id', $selectedId)->get();
+        } else {
+            $cabang = collect();
+        }
         return view('cabang.index', compact('cabang'));
     }
 
     // Menampilkan form untuk membuat cabang baru
     public function create()
     {
-        // Ambil seluruh tahun event untuk pemilihan event saat membuat cabang
-        $tahunevents = \App\Models\Tahunevent::all();
-        return view('cabang.create', compact('tahunevents'));
+        // Pastikan event telah dipilih terlebih dahulu
+        $selectedId = session('selected_event_id');
+        if (!$selectedId) {
+            return redirect()->route('home')->with('error', 'Pilih event terlebih dahulu sebelum menambah cabang.');
+        }
+        return view('cabang.create');
     }
 
     // Menyimpan data cabang baru
@@ -28,15 +36,12 @@ class CabangController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:255',
-            'tahunevent_id' => 'required|exists:tahunevents,id',
         ]);
-
-        // Hanya input field yang relevan
+        $selectedId = session('selected_event_id');
         Cabang::create([
             'nama' => $request->nama,
-            'tahunevent_id' => $request->tahunevent_id,
+            'detail_event_id' => $selectedId,
         ]);
-
         return redirect()->route('cabang.index')->with('success', 'Cabang berhasil ditambahkan');
     }
 
@@ -49,8 +54,7 @@ class CabangController extends Controller
     // Menampilkan form untuk mengedit cabang
     public function edit(Cabang $cabang)
     {
-        $tahunevents = \App\Models\Tahunevent::all();
-        return view('cabang.edit', compact('cabang', 'tahunevents'));
+        return view('cabang.edit', compact('cabang'));
     }
 
     // Mengupdate data cabang
@@ -58,14 +62,10 @@ class CabangController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:255',
-            'tahunevent_id' => 'required|exists:tahunevents,id',
         ]);
-
         $cabang->update([
             'nama' => $request->nama,
-            'tahunevent_id' => $request->tahunevent_id,
         ]);
-
         return redirect()->route('cabang.index')->with('success', 'Cabang berhasil diupdate');
     }
 

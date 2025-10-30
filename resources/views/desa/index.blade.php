@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Data Desa')
-    
+
 @section('content')
 <section class="content">
     <div class="container-fluid">
@@ -24,11 +24,11 @@
                   <th>Edit</th>
                 </tr>
                 </thead>
-                <tbody> 
+                <tbody>
                   @foreach ($desas as $item)
                   <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $item->nama_desa }}</td>
+                    <td>{{ $item->nama }}</td>
                     <td>
                       {{-- <a href="#" class="btn btn-primary btn-xs"><i class="fas fa-eye"></i></a>
                       <a href="{{ route('datasiswa.edit',$item->id) }}" class="btn btn-warning btn-xs"><i class="fas fa-edit"></i></a> --}}

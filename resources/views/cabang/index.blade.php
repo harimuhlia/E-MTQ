@@ -21,7 +21,7 @@
                 <tr>
                   <th>#</th>
                   <th>Nama Cabang</th>
-                  <th>Tahun Event</th>
+                  {{-- Kolom tahun event dihapus karena cabang terkait dengan event terpilih --}}
                   <th>Edit</th>
                 </tr>
                 </thead>
@@ -30,7 +30,7 @@
                   <tr>
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $item->nama }}</td>
-                    <td>{{ optional($item->tahunevent)->tahun_event }}</td>
+                  {{-- Data tahun event tidak ditampilkan karena cabang terkait event terpilih --}}
                     <td>
                       {{-- <a href="#" class="btn btn-primary btn-xs"><i class="fas fa-eye"></i></a>
                       <a href="{{ route('datasiswa.edit',$item->id) }}" class="btn btn-warning btn-xs"><i class="fas fa-edit"></i></a> --}}
@@ -51,7 +51,6 @@
                 <tr>
                     <th>#</th>
                     <th>Nama Cabang</th>
-                    <th>Tahun Event</th>
                     <th>Edit</th>
                 </tr>
                 </tfoot>

@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\DetailEvent;
+use App\Models\Golongan;
 
 class Cabang extends Model
 {
@@ -15,19 +17,28 @@ class Cabang extends Model
      * Atribut yang boleh diisi secara massal.
      *
      * - nama: nama cabang lomba
-     * - tahunevent_id: ID tahun event yang menjadi induk cabang
+     * - detail_event_id: ID event detail yang menjadi induk cabang
      */
     protected $fillable = [
         'nama',
-        'tahunevent_id',
+        'detail_event_id',
     ];
 
     /**
-     * Relasi ke Tahun Event.
-     * Setiap cabang terkait dengan satu tahun event.
+     * Relasi ke Detail Event.
+     * Setiap cabang terkait dengan satu event detail.
      */
-    public function tahunevent()
+    public function detailEvent()
     {
-        return $this->belongsTo(Tahunevent::class);
+        return $this->belongsTo(DetailEvent::class, 'detail_event_id');
+    }
+
+    /**
+     * Relasi ke Golongan.
+     * Satu cabang memiliki banyak golongan.
+     */
+    public function golongans()
+    {
+        return $this->hasMany(Golongan::class);
     }
 }
