@@ -27,7 +27,7 @@
     <div class="card-body">
         <div class="form-group">
             <label for="nama_desa">Nama Desa</label>
-            <input type="text" class="form-control" name="nama_desa" placeholder="Silakan Masukan Nama Desa">
+            <input type="text" class="form-control" name="nama" placeholder="Silakan Masukan Nama Desa">
         </div>
     <div class="card-footer">
     <button type="submit" class="btn btn-primary">Submit</button>

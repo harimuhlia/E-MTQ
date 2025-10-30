@@ -28,7 +28,7 @@
   <div class="card-body">
       <div class="form-group">
         <label for="nama_jurusan">Edit Desa</label>
-        <input type="text" class="form-control" name="nama_desa" value="{{ $desa->nama }}">
+        <input type="text" class="form-control" name="nama" value="{{ $desa->nama }}">
       </div>
   <div class="card-footer">
   <button type="submit" class="btn btn-primary">Submit</button>
