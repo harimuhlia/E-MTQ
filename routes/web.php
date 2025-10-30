@@ -32,18 +32,10 @@ Route::middleware(['auth'])->group(function () {
     Route::resource("desa", DesaController::class)->middleware(['auth']);
     Route::resource("cabang", CabangController::class)->middleware('auth');
     Route::resource("golongan", GolonganController::class)->middleware('auth');
-    // Resource CRUD untuk detail event
     Route::resource('event', DetailEventController::class)->middleware('auth');
-
-    // Route untuk mendapatkan daftar golongan berdasarkan cabang secara AJAX.
-    // Fitur ketentuan usia kini diintegrasikan dalam tabel golongan.
     Route::get('/get-golongan/{cabang_id}', [GolonganController::class, 'getGolonganByCabang']);
-
-    // Event selection and event-specific dashboard
     Route::get('/home/event/{slug}', [HomeController::class, 'event'])->name('home.event');
     Route::get('/home/select-event/{id}', [HomeController::class, 'selectEvent'])->name('home.select_event');
-
-    // Resource untuk pengelolaan operator desa (role admin_desa)
     Route::resource('operator', OperatorController::class);
 });
 
