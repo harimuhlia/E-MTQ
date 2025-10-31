@@ -23,9 +23,12 @@ class EventParticipant extends Model
      * - detail_event_id: ID detail event yang diikuti.
      * - cabang_id: ID cabang lomba.
      * - golongan_id: ID golongan lomba.
-     * - status_verifikasi: status verifikasi (pending, verified, rejected).
-     * - catatan_verifikasi: catatan dari panitia terkait verifikasi.
-     * - request_message: permintaan perubahan data dari peserta.
+    * - status_verifikasi: status verifikasi (belum_verifikasi, sedang_diverifikasi, verifikasi_gagal, verifikasi_berhasil).
+    * - catatan_verifikasi: catatan dari panitia terkait verifikasi.
+    * - request_message: permintaan perubahan data dari peserta.
+    * - kk_path: path ke file Kartu Keluarga yang diunggah.
+    * - akta_path: path ke file Akta Kelahiran yang diunggah.
+    * - ktp_path: path ke file KTP atau kartu pelajar yang diunggah.
      */
     protected $fillable = [
         'user_id',
@@ -35,6 +38,9 @@ class EventParticipant extends Model
         'status_verifikasi',
         'catatan_verifikasi',
         'request_message',
+        'kk_path',
+        'akta_path',
+        'ktp_path',
     ];
 
     /**

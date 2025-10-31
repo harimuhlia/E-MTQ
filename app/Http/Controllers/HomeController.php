@@ -76,16 +76,19 @@ class HomeController extends Controller
         if ($selectedId) {
             $selectedEvent = DetailEvent::find($selectedId);
             if ($selectedEvent) {
-                // Hitung statistik pendaftar per status verifikasi
+                // Hitung statistik pendaftar per status verifikasi menggunakan enumerasi baru
                 $metrics['total'] = EventParticipant::where('detail_event_id', $selectedId)->count();
-                $metrics['verified'] = EventParticipant::where('detail_event_id', $selectedId)
-                    ->where('status_verifikasi', 'verified')
+                $metrics['belum_verifikasi'] = EventParticipant::where('detail_event_id', $selectedId)
+                    ->where('status_verifikasi', 'belum_verifikasi')
                     ->count();
-                $metrics['pending'] = EventParticipant::where('detail_event_id', $selectedId)
-                    ->where('status_verifikasi', 'pending')
+                $metrics['sedang_diverifikasi'] = EventParticipant::where('detail_event_id', $selectedId)
+                    ->where('status_verifikasi', 'sedang_diverifikasi')
                     ->count();
-                $metrics['rejected'] = EventParticipant::where('detail_event_id', $selectedId)
-                    ->where('status_verifikasi', 'rejected')
+                $metrics['verifikasi_gagal'] = EventParticipant::where('detail_event_id', $selectedId)
+                    ->where('status_verifikasi', 'verifikasi_gagal')
+                    ->count();
+                $metrics['verifikasi_berhasil'] = EventParticipant::where('detail_event_id', $selectedId)
+                    ->where('status_verifikasi', 'verifikasi_berhasil')
                     ->count();
                 // Ambil daftar peserta untuk event terpilih beserta relasi yang diperlukan
                 $eventParticipants = EventParticipant::where('detail_event_id', $selectedId)

@@ -31,9 +31,6 @@ class User extends Authenticatable
         'tanggal_lahir',
         'nik',
         'foto',
-        // Status verifikasi dan catatan verifikasi
-        'status_verifikasi',
-        'catatan_verifikasi',
     ];
 
     /**

@@ -5,7 +5,6 @@ use App\Http\Controllers\DesaController;
 use App\Http\Controllers\GolonganController;
 use App\Http\Controllers\OperatorController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\PendaftaranController;
 use App\Http\Controllers\PesertaController;
 use App\Http\Controllers\DetailEventController;
 use App\Http\Controllers\EventParticipantController;
@@ -42,12 +41,10 @@ Route::middleware(['auth'])->group(function () {
 
     // Resource untuk pengelolaan peserta (user role: peserta)
     Route::resource('peserta', PesertaController::class);
-    // Route untuk verifikasi peserta
-    Route::post('/peserta/{id}/verify', [\App\Http\Controllers\PesertaController::class, 'verify'])->name('peserta.verify');
-
-    // Route untuk verifikasi peserta event (pivot event_participants)
-    Route::post('/event-participant/{id}/verify', [\App\Http\Controllers\EventParticipantController::class, 'verify'])->name('event-participant.verify');
+    // Routes untuk verifikasi dan upload berkas event participants
+    Route::get('/event-participant/{participant}/upload', [\App\Http\Controllers\EventParticipantController::class, 'uploadForm'])->name('event-participant.upload.form');
+    Route::post('/event-participant/{participant}/upload', [\App\Http\Controllers\EventParticipantController::class, 'upload'])->name('event-participant.upload');
+    Route::post('/event-participant/{participant}/verify', [\App\Http\Controllers\EventParticipantController::class, 'verify'])->name('event-participant.verify');
+    Route::post('/event-participant/{participant}/reject', [\App\Http\Controllers\EventParticipantController::class, 'reject'])->name('event-participant.reject');
 });
 
-Route::get('pendaftaran/create', [PendaftaranController::class, 'create'])->name('pendaftaran.create')->middleware('auth');
-Route::post('pendaftaran', [PendaftaranController::class, 'store'])->name('pendaftaran.store')->middleware('auth');

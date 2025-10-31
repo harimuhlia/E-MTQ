@@ -14,6 +14,7 @@
         </div>
       </div>
       <div class="row">
+        <!-- Informasi jumlah peserta berdasarkan status verifikasi -->
         <div class="col-md-3 col-sm-6">
           <div class="info-box bg-info">
             <span class="info-box-icon"><i class="far fa-bookmark"></i></span>
@@ -24,20 +25,20 @@
           </div>
         </div>
         <div class="col-md-3 col-sm-6">
-          <div class="info-box bg-success">
-            <span class="info-box-icon"><i class="far fa-thumbs-up"></i></span>
+          <div class="info-box bg-warning">
+            <span class="info-box-icon"><i class="far fa-clock"></i></span>
             <div class="info-box-content">
-              <span class="info-box-text">Lolos Verifikasi</span>
-              <span class="info-box-number">{{ $metrics['verified'] ?? 0 }}</span>
+              <span class="info-box-text">Belum Verifikasi</span>
+              <span class="info-box-number">{{ $metrics['belum_verifikasi'] ?? 0 }}</span>
             </div>
           </div>
         </div>
         <div class="col-md-3 col-sm-6">
-          <div class="info-box bg-warning">
-            <span class="info-box-icon"><i class="far fa-calendar-alt"></i></span>
+          <div class="info-box bg-info">
+            <span class="info-box-icon"><i class="far fa-hourglass-half"></i></span>
             <div class="info-box-content">
-              <span class="info-box-text">Belum Diverifikasi</span>
-              <span class="info-box-number">{{ $metrics['pending'] ?? 0 }}</span>
+              <span class="info-box-text">Sedang Diverifikasi</span>
+              <span class="info-box-number">{{ $metrics['sedang_diverifikasi'] ?? 0 }}</span>
             </div>
           </div>
         </div>
@@ -45,8 +46,17 @@
           <div class="info-box bg-danger">
             <span class="info-box-icon"><i class="fas fa-times-circle"></i></span>
             <div class="info-box-content">
-              <span class="info-box-text">Tidak Lolos</span>
-              <span class="info-box-number">{{ $metrics['rejected'] ?? 0 }}</span>
+              <span class="info-box-text">Verifikasi Gagal</span>
+              <span class="info-box-number">{{ $metrics['verifikasi_gagal'] ?? 0 }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+          <div class="info-box bg-success">
+            <span class="info-box-icon"><i class="far fa-thumbs-up"></i></span>
+            <div class="info-box-content">
+              <span class="info-box-text">Verifikasi Berhasil</span>
+              <span class="info-box-number">{{ $metrics['verifikasi_berhasil'] ?? 0 }}</span>
             </div>
           </div>
         </div>
@@ -125,30 +135,59 @@
                       <td>{{ $participant->cabang->nama ?? '-' }}</td>
                       <td>{{ $participant->golongan->nama ?? '-' }}</td>
                       <td>
-                        @if($participant->status_verifikasi === 'verified')
-                          <span class="badge badge-success">Verified</span>
-                        @elseif($participant->status_verifikasi === 'rejected')
-                          <span class="badge badge-danger">Rejected</span>
-                        @else
-                          <span class="badge badge-warning">Pending</span>
-                        @endif
+                        @switch($participant->status_verifikasi)
+                          @case('belum_verifikasi')
+                            <span class="badge badge-warning">Belum Verifikasi</span>
+                            @break
+                          @case('sedang_diverifikasi')
+                            <span class="badge badge-info">Sedang Diverifikasi</span>
+                            @break
+                          @case('verifikasi_gagal')
+                            <span class="badge badge-danger">Verifikasi Gagal</span>
+                            @break
+                          @case('verifikasi_berhasil')
+                            <span class="badge badge-success">Verifikasi Berhasil</span>
+                            @break
+                          @default
+                            <span class="badge badge-secondary">-</span>
+                        @endswitch
                       </td>
                       <td>
                         @php
+                          // Tentukan hak aksi berdasarkan peran dan asal desa
                           $canVerify = false;
+                          $canReject = false;
+                          $canUpload = false;
                           if($currentUser->role === 'administrator') {
-                            $canVerify = true;
+                              $canVerify = true;
+                              $canReject = true;
                           } elseif($currentUser->role === 'admin_desa' && $participant->user && $participant->user->desa_id === $currentUser->desa_id) {
-                            $canVerify = true;
-                          } elseif($currentUser->role === 'peserta' && $participant->user && $participant->user->id === $currentUser->id) {
-                            $canVerify = true;
+                              $canVerify = true;
+                              $canReject = true;
+                          }
+                          // Peserta dapat mengunggah berkas sendiri jika belum verifikasi atau verifikasi gagal
+                          if($currentUser->role === 'peserta' && $participant->user && $participant->user->id === $currentUser->id) {
+                              if(in_array($participant->status_verifikasi, ['belum_verifikasi','verifikasi_gagal'])) {
+                                  $canUpload = true;
+                              }
                           }
                         @endphp
-                        @if($canVerify && $participant->status_verifikasi !== 'verified')
-                          <form action="{{ route('event-participant.verify', $participant->id) }}" method="POST" style="display:inline-block;">
-                            @csrf
-                            <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Verifikasi peserta ini?')">Verifikasi</button>
-                          </form>
+                        @if($canUpload)
+                          <a href="{{ route('event-participant.upload.form', $participant->id) }}" class="btn btn-primary btn-sm">Upload Berkas</a>
+                        @elseif($participant->status_verifikasi === 'sedang_diverifikasi')
+                          @if($canVerify)
+                            <form action="{{ route('event-participant.verify', $participant->id) }}" method="POST" style="display:inline-block;">
+                              @csrf
+                              <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Terima verifikasi berkas peserta ini?')">Verifikasi</button>
+                            </form>
+                          @endif
+                          @if($canReject)
+                            <form action="{{ route('event-participant.reject', $participant->id) }}" method="POST" style="display:inline-block; margin-left:4px;">
+                              @csrf
+                              <input type="text" name="reason" class="form-control form-control-sm mb-1" placeholder="Catatan penolakan" required>
+                              <button type="submit" class="btn btn-danger btn-sm">Tolak</button>
+                            </form>
+                          @endif
                         @else
                           &mdash;
                         @endif
@@ -193,15 +232,15 @@
           <div class="col-md-4 col-sm-6 mb-3">
             <div class="card border-{{ $event->statusClass() }}">
               <div class="card-body">
-                <h5 class="card-title">{{ $event->nama_kegiatan_aktif }}</h5>
-                <p class="mb-1"><small class="text-muted">Pendaftaran:</small></p>
-                <p class="mb-2">
-                  <small>
+                <h5 class="card-title" style="width: 100%;">{{ $event->nama_kegiatan_aktif }}</h5>
+                <p><small>Pendaftaran:</small>
+                    <small class="text-muted">
                     {{ optional($event->pendaftaran_mulai)->translatedFormat('d M Y H:i') ?? '-' }}
                     &ndash;
                     {{ optional($event->pendaftaran_selesai)->translatedFormat('d M Y H:i') ?? '-' }}
                   </small>
                 </p>
+
                 <p class="mb-2">Status: <span class="badge badge-{{ $event->statusClass() }}">{{ $event->status() }}</span></p>
                 <a href="{{ route('home.event', $event->slug) }}" class="btn btn-primary btn-sm">Kelola Event</a>
               </div>
