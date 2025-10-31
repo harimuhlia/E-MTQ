@@ -33,10 +33,19 @@ class HomeController extends Controller
          * terkait event tersebut.
          */
         $request = request();
-        // Ambil parameter tahun dari query string atau dari session
-        $year = $request->query('year');
-        if ($year) {
-            session(['selected_year' => $year]);
+        // Ambil parameter tahun dari query string atau dari session.
+        // Perbaikan filter tahun: jika parameter year dikirim (meski kosong), atur ulang sesi.
+        // Saat opsi "Semua Tahun" dipilih (value kosong atau null), hapus sesi agar menampilkan semua event.
+        if ($request->has('year')) {
+            $yearInput = $request->query('year');
+            if ($yearInput) {
+                session(['selected_year' => $yearInput]);
+                $year = $yearInput;
+            } else {
+                // kosongkan filter tahun jika memilih Semua Tahun
+                session()->forget('selected_year');
+                $year = null;
+            }
         } else {
             $year = session('selected_year');
         }
@@ -63,9 +72,11 @@ class HomeController extends Controller
         $selectedId = session('selected_event_id');
         $selectedEvent = null;
         $metrics = [];
+        $eventParticipants = [];
         if ($selectedId) {
             $selectedEvent = DetailEvent::find($selectedId);
             if ($selectedEvent) {
+                // Hitung statistik pendaftar per status verifikasi
                 $metrics['total'] = EventParticipant::where('detail_event_id', $selectedId)->count();
                 $metrics['verified'] = EventParticipant::where('detail_event_id', $selectedId)
                     ->where('status_verifikasi', 'verified')
@@ -76,6 +87,10 @@ class HomeController extends Controller
                 $metrics['rejected'] = EventParticipant::where('detail_event_id', $selectedId)
                     ->where('status_verifikasi', 'rejected')
                     ->count();
+                // Ambil daftar peserta untuk event terpilih beserta relasi yang diperlukan
+                $eventParticipants = EventParticipant::where('detail_event_id', $selectedId)
+                    ->with(['user.desa', 'cabang', 'golongan'])
+                    ->get();
             }
         }
 
@@ -86,6 +101,7 @@ class HomeController extends Controller
             'filteredEvents' => $filteredEvents,
             'selectedEvent' => $selectedEvent,
             'metrics' => $metrics,
+            'eventParticipants' => $eventParticipants,
         ]);
     }
 

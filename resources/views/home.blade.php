@@ -94,6 +94,77 @@
           </div>
         </div>
       </div>
+
+      <!-- Daftar peserta event -->
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Daftar Peserta</h3>
+            </div>
+            <div class="card-body table-responsive">
+              <table class="table table-bordered table-hover">
+                <thead class="thead-light">
+                  <tr>
+                    <th>#</th>
+                    <th>Nama Peserta</th>
+                    <th>Desa</th>
+                    <th>Cabang</th>
+                    <th>Golongan</th>
+                    <th>Status Verifikasi</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @php $currentUser = auth()->user(); @endphp
+                  @forelse($eventParticipants as $participant)
+                    <tr>
+                      <td>{{ $loop->iteration }}</td>
+                      <td>{{ $participant->user->name ?? '-' }}</td>
+                      <td>{{ $participant->user->desa->nama ?? '-' }}</td>
+                      <td>{{ $participant->cabang->nama ?? '-' }}</td>
+                      <td>{{ $participant->golongan->nama ?? '-' }}</td>
+                      <td>
+                        @if($participant->status_verifikasi === 'verified')
+                          <span class="badge badge-success">Verified</span>
+                        @elseif($participant->status_verifikasi === 'rejected')
+                          <span class="badge badge-danger">Rejected</span>
+                        @else
+                          <span class="badge badge-warning">Pending</span>
+                        @endif
+                      </td>
+                      <td>
+                        @php
+                          $canVerify = false;
+                          if($currentUser->role === 'administrator') {
+                            $canVerify = true;
+                          } elseif($currentUser->role === 'admin_desa' && $participant->user && $participant->user->desa_id === $currentUser->desa_id) {
+                            $canVerify = true;
+                          } elseif($currentUser->role === 'peserta' && $participant->user && $participant->user->id === $currentUser->id) {
+                            $canVerify = true;
+                          }
+                        @endphp
+                        @if($canVerify && $participant->status_verifikasi !== 'verified')
+                          <form action="{{ route('event-participant.verify', $participant->id) }}" method="POST" style="display:inline-block;">
+                            @csrf
+                            <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Verifikasi peserta ini?')">Verifikasi</button>
+                          </form>
+                        @else
+                          &mdash;
+                        @endif
+                      </td>
+                    </tr>
+                  @empty
+                    <tr>
+                      <td colspan="7" class="text-center">Belum ada peserta untuk event ini.</td>
+                    </tr>
+                  @endforelse
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
     @else
       <!-- Daftar event dengan filter tahun -->
       <div class="row mb-3">

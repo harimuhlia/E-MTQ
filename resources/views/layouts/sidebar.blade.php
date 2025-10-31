@@ -76,19 +76,19 @@
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="{{ route('peserta.create') }}" class="nav-link {{ request()->is('peserta/create') ? 'active' : '' }}">
                   <i class="far fa-circle nav-icon"></i>
                   <p>Form Daftar</p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="{{ route('home') }}" class="nav-link {{ request()->is('home*') && session('selected_event_id') ? 'active' : '' }}">
                   <i class="far fa-circle nav-icon"></i>
                   <p>Verifikasi Pendaftar</p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="{{ route('peserta.index') }}" class="nav-link {{ request()->is('peserta') || request()->is('peserta/*') ? 'active' : '' }}">
                   <i class="far fa-circle nav-icon"></i>
                   <p>List Peserta</p>
                 </a>
@@ -102,6 +102,14 @@
               <p>Pengumuman</p>
             </a>
           </li>
+
+        <!-- Daftar Peserta (selalu tersedia) -->
+        <li class="nav-item">
+          <a href="{{ route('peserta.index') }}" class="nav-link {{ request()->is('peserta*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-users"></i>
+            <p>Peserta</p>
+          </a>
+        </li>
           @endif
 
           <li class="nav-header">PENGATURAN</li>
