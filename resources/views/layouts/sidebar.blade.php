@@ -33,6 +33,7 @@
       <!-- Sidebar Menu -->
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <!-- Dashboard always visible -->
           <li class="nav-item">
             <a href="{{ route('home') }}" class="nav-link {{ request()->is('home*') ? 'active' : '' }}">
               <i class="nav-icon fas fa-tachometer-alt"></i>
@@ -40,73 +41,81 @@
             </a>
           </li>
 
+          <!-- Only show event-related menus if an event has been selected -->
           @if(session('selected_event_id'))
-          <!-- Data Master: muncul hanya jika event telah dipilih -->
-          <li class="nav-item has-treeview {{ request()->is('cabang*') || request()->is('golongan*') ? 'menu-open' : '' }}">
-            <a href="#" class="nav-link {{ request()->is('cabang*') || request()->is('golongan*') ? 'active' : '' }}">
-              <i class="nav-icon fas fa-database"></i>
-              <p>
-                Data Master
-                <i class="fas fa-angle-left right"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="{{ route('cabang.index') }}" class="nav-link {{ request()->is('cabang*') ? 'active' : '' }}">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Cabang</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{{ route('golongan.index') }}" class="nav-link {{ request()->is('golongan*') ? 'active' : '' }}">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Golongan</p>
-                </a>
-              </li>
-            </ul>
-          </li>
-          <!-- Pendaftaran -->
-          <li class="nav-item has-treeview">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-edit"></i>
-              <p>
-                Pendaftaran
-                <i class="fas fa-angle-left right"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="{{ route('peserta.create') }}" class="nav-link {{ request()->is('peserta/create') ? 'active' : '' }}">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Form Daftar</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{{ route('home') }}" class="nav-link {{ request()->is('home*') && session('selected_event_id') ? 'active' : '' }}">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Verifikasi Pendaftar</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{{ route('peserta.index') }}" class="nav-link {{ request()->is('peserta') ? 'active' : '' }}">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>List Peserta</p>
-                </a>
-              </li>
-            </ul>
-          </li>
-          <!-- Pengumuman -->
-          <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-bullhorn"></i>
-              <p>Pengumuman</p>
-            </a>
-          </li>
+            @php $role = auth()->user()->role; @endphp
+            <!-- Data Master: only administrator can manage cabang & golongan -->
+            @if($role === 'administrator')
+            <li class="nav-item has-treeview {{ request()->is('cabang*') || request()->is('golongan*') ? 'menu-open' : '' }}">
+              <a href="#" class="nav-link {{ request()->is('cabang*') || request()->is('golongan*') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-database"></i>
+                <p>
+                  Data Master
+                  <i class="fas fa-angle-left right"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="{{ route('cabang.index') }}" class="nav-link {{ request()->is('cabang*') ? 'active' : '' }}">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>Cabang</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="{{ route('golongan.index') }}" class="nav-link {{ request()->is('golongan*') ? 'active' : '' }}">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>Golongan</p>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            @endif
 
+            <!-- Pendaftaran: accessible to administrator and admin_desa -->
+            @if(in_array($role, ['administrator', 'admin_desa']))
+            <li class="nav-item has-treeview {{ request()->is('peserta/create') || (request()->is('home*') && session('selected_event_id')) || request()->is('peserta') ? 'menu-open' : '' }}">
+              <a href="#" class="nav-link {{ request()->is('peserta/create') || (request()->is('home*') && session('selected_event_id')) || request()->is('peserta') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-edit"></i>
+                <p>
+                  Pendaftaran
+                  <i class="fas fa-angle-left right"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="{{ route('peserta.create') }}" class="nav-link {{ request()->is('peserta/create') ? 'active' : '' }}">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>Form Daftar</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="{{ route('home') }}" class="nav-link {{ request()->is('home*') && session('selected_event_id') ? 'active' : '' }}">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>Verifikasi Pendaftar</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="{{ route('peserta.index') }}" class="nav-link {{ request()->is('peserta') ? 'active' : '' }}">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>List Peserta</p>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            @endif
+
+            <!-- Pengumuman: visible to all roles -->
+            <li class="nav-item">
+              <a href="{{ route('announcements.index') }}" class="nav-link {{ request()->is('announcements*') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-bullhorn"></i>
+                <p>Pengumuman</p>
+              </a>
+            </li>
           @endif
 
           <li class="nav-header">PENGATURAN</li>
-          <!-- Kelompok Desa: kelola desa dan operator -->
+          @if($role === 'administrator')
+          <!-- Kelompok Desa: hanya administrator dapat kelola desa & operator -->
           <li class="nav-item has-treeview {{ request()->is('desa*') || request()->is('operator*') ? 'menu-open' : '' }}">
             <a href="#" class="nav-link {{ request()->is('desa*') || request()->is('operator*') ? 'active' : '' }}">
               <i class="nav-icon far fa-id-card"></i>
@@ -130,6 +139,7 @@
               </li>
             </ul>
           </li>
+          @endif
 
           <!-- Logout button -->
           <li class="nav-item">

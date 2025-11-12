@@ -232,15 +232,15 @@
           <div class="col-md-4 col-sm-6 mb-3">
             <div class="card border-{{ $event->statusClass() }}">
               <div class="card-body">
-                <h5 class="card-title" style="width: 100%;">{{ $event->nama_kegiatan_aktif }}</h5>
-                <p><small>Pendaftaran:</small>
-                    <small class="text-muted">
+                <h5 class="card-title">{{ $event->nama_kegiatan_aktif }}</h5>
+                <p class="mb-1"><small class="text-muted">Pendaftaran:</small></p>
+                <p class="mb-2">
+                  <small>
                     {{ optional($event->pendaftaran_mulai)->translatedFormat('d M Y H:i') ?? '-' }}
                     &ndash;
                     {{ optional($event->pendaftaran_selesai)->translatedFormat('d M Y H:i') ?? '-' }}
                   </small>
                 </p>
-
                 <p class="mb-2">Status: <span class="badge badge-{{ $event->statusClass() }}">{{ $event->status() }}</span></p>
                 <a href="{{ route('home.event', $event->slug) }}" class="btn btn-primary btn-sm">Kelola Event</a>
               </div>

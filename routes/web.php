@@ -30,21 +30,43 @@ Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::middleware(['auth'])->group(function () {
-    Route::resource("desa", DesaController::class)->middleware(['auth']);
-    Route::resource("cabang", CabangController::class)->middleware('auth');
-    Route::resource("golongan", GolonganController::class)->middleware('auth');
-    Route::resource('event', DetailEventController::class)->middleware('auth');
-    Route::get('/get-golongan/{cabang_id}', [GolonganController::class, 'getGolonganByCabang']);
-    Route::get('/home/event/{slug}', [HomeController::class, 'event'])->name('home.event');
-    Route::get('/home/select-event/{id}', [HomeController::class, 'selectEvent'])->name('home.select_event');
-    Route::resource('operator', OperatorController::class);
+    // Dashboard home & event selection
+    Route::get('/home', [HomeController::class, 'index'])->name('home');
+    // Event dashboard and selecting event are limited to administrators and operator (admin_desa)
+    Route::middleware('role:administrator,admin_desa')->group(function () {
+        Route::get('/home/event/{slug}', [HomeController::class, 'event'])->name('home.event');
+        Route::get('/home/select-event/{id}', [HomeController::class, 'selectEvent'])->name('home.select_event');
+    });
 
-    // Resource untuk pengelolaan peserta (user role: peserta)
-    Route::resource('peserta', PesertaController::class);
-    // Routes untuk verifikasi dan upload berkas event participants
-    Route::get('/event-participant/{participant}/upload', [\App\Http\Controllers\EventParticipantController::class, 'uploadForm'])->name('event-participant.upload.form');
-    Route::post('/event-participant/{participant}/upload', [\App\Http\Controllers\EventParticipantController::class, 'upload'])->name('event-participant.upload');
-    Route::post('/event-participant/{participant}/verify', [\App\Http\Controllers\EventParticipantController::class, 'verify'])->name('event-participant.verify');
-    Route::post('/event-participant/{participant}/reject', [\App\Http\Controllers\EventParticipantController::class, 'reject'])->name('event-participant.reject');
+    // Routes accessible only to superadmin (administrator)
+    Route::middleware('role:administrator')->group(function () {
+        Route::resource('desa', DesaController::class);
+        Route::resource('cabang', CabangController::class);
+        Route::resource('golongan', GolonganController::class);
+        Route::resource('event', DetailEventController::class);
+        Route::resource('operator', OperatorController::class);
+        // Pengumuman: hanya superadmin dapat menambah/mengubah/menghapus
+        Route::resource('announcements', \App\Http\Controllers\AnnouncementController::class);
+    });
+
+    // Routes accessible to superadmin and admin desa (pendaftaran & verifikasi)
+    Route::middleware('role:administrator,admin_desa')->group(function () {
+        // Form daftar peserta, simpan peserta, dll.
+        Route::resource('peserta', PesertaController::class)->except(['index', 'show']);
+        // Endpoint untuk mendapatkan golongan berdasarkan cabang
+        Route::get('/get-golongan/{cabang_id}', [GolonganController::class, 'getGolonganByCabang']);
+        // Event participants verification & upload
+        Route::get('/event-participant/{participant}/upload', [EventParticipantController::class, 'uploadForm'])->name('event-participant.upload.form');
+        Route::post('/event-participant/{participant}/upload', [EventParticipantController::class, 'upload'])->name('event-participant.upload');
+        Route::post('/event-participant/{participant}/verify', [EventParticipantController::class, 'verify'])->name('event-participant.verify');
+        Route::post('/event-participant/{participant}/reject', [EventParticipantController::class, 'reject'])->name('event-participant.reject');
+    });
+
+    // Routes accessible to all authenticated users
+    // Peserta index: semua peran dapat melihat daftar peserta
+    Route::get('peserta', [PesertaController::class, 'index'])->name('peserta.index');
+    // Announcements index & show: semua dapat melihat
+    Route::get('announcements', [\App\Http\Controllers\AnnouncementController::class, 'index'])->name('announcements.index');
+    Route::get('announcements/{announcement}', [\App\Http\Controllers\AnnouncementController::class, 'show'])->name('announcements.show');
 });
 

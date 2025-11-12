@@ -31,6 +31,8 @@ class User extends Authenticatable
         'tanggal_lahir',
         'nik',
         'foto',
+        // Kolom status_verifikasi dan catatan_verifikasi telah dihapus karena verifikasi kini
+        // dikelola pada tabel pivot event_participants. Jangan tambahkan kembali kolom ini.
     ];
 
     /**

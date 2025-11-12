@@ -92,4 +92,21 @@ class GolonganController extends Controller
         $golongan->delete();
         return redirect()->route('golongan.index')->with('success', 'Golongan berhasil dihapus');
     }
+
+    /**
+     * Kembalikan daftar golongan berdasarkan cabang yang diberikan dalam format JSON.
+     *
+     * Digunakan untuk AJAX ketika memilih cabang pada form pendaftaran peserta.
+     *
+     * @param  int  $cabang_id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getGolonganByCabang($cabang_id)
+    {
+        $golongans = Golongan::where('cabang_id', $cabang_id)
+            ->select('id', 'nama')
+            ->orderBy('nama')
+            ->get();
+        return response()->json($golongans);
+    }
 }
