@@ -51,8 +51,9 @@ class PesertaController extends Controller
     public function create()
     {
         $user = auth()->user();
-        // Hanya operator desa atau superadmin yang boleh menambah peserta
-        if (!in_array($user->role, ['admin_desa', 'administrator'])) {
+        // Hanya operator desa atau superadmin yang boleh menambah peserta.
+        $userRole = trim(strtolower($user->role));
+        if (! in_array($userRole, ['admin_desa', 'administrator'])) {
             abort(403);
         }
         // Pastikan event terpilih
@@ -81,7 +82,8 @@ class PesertaController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user();
-        if (!in_array($user->role, ['admin_desa', 'administrator'])) {
+        $userRole = trim(strtolower($user->role));
+        if (! in_array($userRole, ['admin_desa', 'administrator'])) {
             abort(403);
         }
         // Pastikan event terpilih
@@ -146,7 +148,8 @@ class PesertaController extends Controller
     {
         $currentUser = auth()->user();
         // Only administrator or admin_desa may edit
-        if (! in_array($currentUser->role, ['administrator', 'admin_desa'])) {
+        $role = trim(strtolower($currentUser->role));
+        if (! in_array($role, ['administrator', 'admin_desa'])) {
             abort(403);
         }
         // Ensure the user being edited is a participant
@@ -204,7 +207,8 @@ class PesertaController extends Controller
     public function update(Request $request, User $peserta)
     {
         $currentUser = auth()->user();
-        if (! in_array($currentUser->role, ['administrator', 'admin_desa'])) {
+        $role = trim(strtolower($currentUser->role));
+        if (! in_array($role, ['administrator', 'admin_desa'])) {
             abort(403);
         }
         if ($peserta->role !== 'peserta') {
@@ -279,7 +283,8 @@ class PesertaController extends Controller
     public function destroy(User $peserta)
     {
         $currentUser = auth()->user();
-        if (! in_array($currentUser->role, ['administrator', 'admin_desa'])) {
+        $role = trim(strtolower($currentUser->role));
+        if (! in_array($role, ['administrator', 'admin_desa'])) {
             abort(403);
         }
         if ($peserta->role !== 'peserta') {

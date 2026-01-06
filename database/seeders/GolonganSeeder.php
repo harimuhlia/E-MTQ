@@ -13,9 +13,9 @@ class GolonganSeeder extends Seeder
         $cabang = Cabang::first();
 
         Golongan::insert([
-            ['cabang_id' => $cabang->id, 'name' => 'Al-Falaq'],
-            ['cabang_id' => $cabang->id, 'name' => 'Al-Quraisy'],
-            ['cabang_id' => $cabang->id, 'name' => 'At-Takatsur'],
+            ['cabang_id' => $cabang->id, 'nama' => 'Al-Falaq'],
+            ['cabang_id' => $cabang->id, 'nama' => 'Al-Quraisy'],
+            ['cabang_id' => $cabang->id, 'nama' => 'At-Takatsur'],
         ]);
     }
 }

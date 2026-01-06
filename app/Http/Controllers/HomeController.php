@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\DetailEvent;
 use App\Models\EventParticipant;
+use App\Models\Announcement;
 
 class HomeController extends Controller
 {
@@ -73,6 +74,8 @@ class HomeController extends Controller
         $selectedEvent = null;
         $metrics = [];
         $eventParticipants = collect();
+        // Prepare announcements collection
+        $announcements = collect();
         if ($selectedId) {
             $selectedEvent = DetailEvent::find($selectedId);
             if ($selectedEvent) {
@@ -101,6 +104,11 @@ class HomeController extends Controller
                 $metrics['verifikasi_gagal'] = $eventParticipants->where('status_verifikasi', 'verifikasi_gagal')->count();
                 $metrics['verifikasi_berhasil'] = $eventParticipants->where('status_verifikasi', 'verifikasi_berhasil')->count();
             }
+            // Ambil pengumuman terbaru untuk event terpilih (maks 5)
+            $announcements = Announcement::where('detail_event_id', $selectedId)
+                ->latest()
+                ->take(5)
+                ->get();
         }
 
         // Determine status of selected event for view logic
@@ -114,6 +122,7 @@ class HomeController extends Controller
             'metrics' => $metrics,
             'eventParticipants' => $eventParticipants,
             'selectedEventStatus' => $selectedEventStatus,
+            'announcements' => $announcements,
         ]);
     }
 

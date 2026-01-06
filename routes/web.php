@@ -49,10 +49,8 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('announcements', \App\Http\Controllers\AnnouncementController::class)->except(['index', 'show']);
     });
 
-    // Routes accessible to superadmin and admin desa (pendaftaran & verifikasi)
+    // Routes accessible to superadmin and admin desa (verifikasi & operasi terkait event participants)
     Route::middleware('role:administrator,admin_desa')->group(function () {
-        // Form daftar peserta, simpan peserta, dll.
-        Route::resource('peserta', PesertaController::class)->except(['index', 'show']);
         // Endpoint untuk mendapatkan golongan berdasarkan cabang
         Route::get('/get-golongan/{cabang_id}', [GolonganController::class, 'getGolonganByCabang']);
         // Event participants verification & upload
@@ -61,6 +59,22 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/event-participant/{participant}/verify', [EventParticipantController::class, 'verify'])->name('event-participant.verify');
         Route::post('/event-participant/{participant}/reject', [EventParticipantController::class, 'reject'])->name('event-participant.reject');
     });
+
+    // Pendaftaran peserta: batasi akses melalui controller, tidak melalui middleware peran
+    // Create, store, edit, update, dan delete peserta hanya boleh diakses oleh administrator
+    // dan admin_desa sesuai logika di PesertaController. Menempatkan resource ini di
+    // luar middleware peran memungkinkan controller menampilkan pesan kesalahan yang
+    // lebih spesifik daripada 403 dari RoleMiddleware.
+    Route::resource('peserta', PesertaController::class)->except(['index', 'show']);
+
+    // Daftar peserta event & verifikasi: tersedia untuk semua peran yang sudah login
+    // Halaman ini menampilkan daftar peserta untuk event terpilih dan tombol aksi untuk
+    // mengunggah berkas, memverifikasi atau menolak sesuai dengan peran. Peserta hanya
+    // melihat dirinya sendiri dan dapat mengunggah berkas. Administrator dan admin_desa
+    // dapat melihat daftar peserta (dibatasi desa untuk admin_desa) dan melakukan
+    // verifikasi atau penolakan. Rute ini diletakkan di luar middleware peran khusus
+    // agar peserta juga bisa mengaksesnya.
+    Route::get('/event-participants', [EventParticipantController::class, 'index'])->name('event-participant.index');
 
     // Routes accessible to all authenticated users
     // Peserta index: semua peran dapat melihat daftar peserta

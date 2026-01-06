@@ -115,7 +115,7 @@
                 </li>
                 @endif
                 <li class="nav-item">
-                  <a href="{{ route('home') }}" class="nav-link {{ request()->is('home*') && session('selected_event_id') ? 'active' : '' }}">
+                  <a href="{{ route('event-participant.index') }}" class="nav-link {{ request()->is('event-participants*') ? 'active' : '' }}">
                     <i class="far fa-circle nav-icon"></i>
                     <p>Verifikasi Pendaftar</p>
                   </a>

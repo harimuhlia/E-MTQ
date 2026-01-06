@@ -14,7 +14,7 @@ class CabangSeeder extends Seeder
 
         Cabang::create([
             'detail_event_id' => $event->id,
-            'name' => 'Hafalan',
+            'nama' => 'Hafalan',
         ]);
     }
 }

@@ -105,6 +105,31 @@
         </div>
       </div>
 
+      {{-- Pengumuman terbaru untuk event terpilih --}}
+      @if(isset($announcements) && $announcements->count())
+      <div class="row mt-4">
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Pengumuman Terbaru</h3>
+            </div>
+            <div class="card-body">
+              @foreach($announcements as $announcement)
+                <div class="mb-3">
+                  <h5>{{ $announcement->title }}</h5>
+                  <p>{!! \Illuminate\Support\Str::limit(strip_tags($announcement->content), 150) !!}</p>
+                  <small class="text-muted">{{ $announcement->created_at->format('d M Y H:i') }}</small>
+                  @if(!$loop->last)
+                  <hr>
+                  @endif
+                </div>
+              @endforeach
+            </div>
+          </div>
+        </div>
+      </div>
+      @endif
+
       <!-- Daftar peserta event -->
       <div class="row mt-4">
         <div class="col-12">

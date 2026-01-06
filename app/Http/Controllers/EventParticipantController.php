@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\EventParticipant;
+use App\Models\DetailEvent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -24,6 +25,50 @@ class EventParticipantController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+    }
+
+    /**
+     * Tampilkan daftar peserta untuk event terpilih dan aksi verifikasi.
+     *
+     * Halaman ini menggantikan navigasi "Verifikasi Pendaftar". Semua peran
+     * dapat mengaksesnya setelah memilih event. Peserta hanya melihat
+     * dirinya sendiri dan dapat mengunggah berkas. Administrator melihat
+     * semua peserta, sedangkan admin_desa melihat peserta dari desanya.
+     * Aksi (upload, verifikasi, tolak) dibatasi berdasarkan peran dan
+     * status event, mirip dengan logika di dashboard home.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable|\Illuminate\Http\RedirectResponse
+     */
+    public function index()
+    {
+        $currentUser = auth()->user();
+        // Pastikan event dipilih
+        $eventId = session('selected_event_id');
+        if (!$eventId) {
+            return redirect()->route('home')->with('error', 'Pilih event terlebih dahulu untuk melihat peserta.');
+        }
+        $selectedEvent = DetailEvent::find($eventId);
+        if (! $selectedEvent) {
+            return redirect()->route('home')->with('error', 'Event tidak ditemukan.');
+        }
+        $selectedEventStatus = $selectedEvent->status();
+        // Ambil peserta sesuai peran
+        $query = EventParticipant::where('detail_event_id', $eventId)
+            ->with(['user.desa', 'cabang', 'golongan']);
+        if ($currentUser->role === 'admin_desa') {
+            $query->whereHas('user', function ($q) use ($currentUser) {
+                $q->where('desa_id', $currentUser->desa_id);
+            });
+        } elseif ($currentUser->role === 'peserta') {
+            $query->where('user_id', $currentUser->id);
+        }
+        $eventParticipants = $query->get();
+        return view('event_participant.index', [
+            'eventParticipants' => $eventParticipants,
+            'selectedEvent' => $selectedEvent,
+            'selectedEventStatus' => $selectedEventStatus,
+            'currentUser' => $currentUser,
+        ]);
     }
 
     /**
