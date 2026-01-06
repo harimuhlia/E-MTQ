@@ -13,6 +13,8 @@ class Announcement extends Model
         'title',
         'content',
         'user_id',
+        // Associate announcement with a specific detail event.
+        'detail_event_id',
     ];
 
     /**
@@ -21,5 +23,17 @@ class Announcement extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the event associated with this announcement.
+     *
+     * Each announcement may belong to a single detail event. If the
+     * announcement is not tied to any event (detail_event_id is null),
+     * it will not appear in any event-specific listing.
+     */
+    public function detailEvent()
+    {
+        return $this->belongsTo(DetailEvent::class, 'detail_event_id');
     }
 }

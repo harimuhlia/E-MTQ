@@ -8,12 +8,16 @@
     @if(session('success'))
       <div class="alert alert-success">{{ session('success') }}</div>
     @endif
+
+    @if(!session('selected_event_id'))
+      <div class="alert alert-info">Silakan pilih event terlebih dahulu untuk melihat pengumuman.</div>
+    @endif
     <div class="row">
       <div class="col-md-12">
         <div class="card card-primary">
           <div class="card-header d-flex justify-content-between align-items-center">
             <h3 class="card-title">Daftar Pengumuman</h3>
-            @if($user && $user->role === 'administrator')
+            @if($user && $user->role === 'administrator' && session('selected_event_id'))
               <a href="{{ route('announcements.create') }}" class="btn btn-sm btn-light">Tambah Pengumuman</a>
             @endif
           </div>
@@ -50,7 +54,7 @@
                       @endif
                     </tr>
                   @empty
-                    <tr><td colspan="5" class="text-center">Belum ada pengumuman.</td></tr>
+                    <tr><td colspan="5" class="text-center">Belum ada pengumuman untuk event ini.</td></tr>
                   @endforelse
                 </tbody>
               </table>

@@ -122,6 +122,7 @@
                     <th>Cabang</th>
                     <th>Golongan</th>
                     <th>Status Verifikasi</th>
+                    <th>Permintaan Data</th>
                     <th>Aksi</th>
                   </tr>
                 </thead>
@@ -153,42 +154,74 @@
                         @endswitch
                       </td>
                       <td>
+                        {{ $participant->request_message ?? '—' }}
+                      </td>
+                      <td>
                         @php
                           // Tentukan hak aksi berdasarkan peran dan asal desa
                           $canVerify = false;
                           $canReject = false;
                           $canUpload = false;
-                          if($currentUser->role === 'administrator') {
+                          $canEdit = false;
+                          $canRequestChange = false;
+                          if ($currentUser->role === 'administrator') {
                               $canVerify = true;
                               $canReject = true;
-                          } elseif($currentUser->role === 'admin_desa' && $participant->user && $participant->user->desa_id === $currentUser->desa_id) {
+                              $canEdit = true;
+                          } elseif ($currentUser->role === 'admin_desa' && $participant->user && $participant->user->desa_id === $currentUser->desa_id) {
                               $canVerify = true;
                               $canReject = true;
-                          }
-                          // Peserta dapat mengunggah berkas sendiri jika belum verifikasi atau verifikasi gagal
-                          if($currentUser->role === 'peserta' && $participant->user && $participant->user->id === $currentUser->id) {
-                              if(in_array($participant->status_verifikasi, ['belum_verifikasi','verifikasi_gagal'])) {
-                                  $canUpload = true;
+                              // Operator dapat mengedit peserta sebelum verifikasi berhasil
+                              if ($participant->status_verifikasi !== 'verifikasi_berhasil') {
+                                  $canEdit = true;
                               }
                           }
+                          // Peserta dapat mengunggah berkas sendiri jika belum verifikasi atau verifikasi gagal
+                          if ($currentUser->role === 'peserta' && $participant->user && $participant->user->id === $currentUser->id) {
+                              if (in_array($participant->status_verifikasi, ['belum_verifikasi', 'verifikasi_gagal'])) {
+                                  $canUpload = true;
+                                  $canRequestChange = true;
+                              }
+                          }
+                          // Batasi aksi berdasarkan status event: jika bukan Aktif, non-admin tidak dapat melakukan aksi apapun
+                          if (isset($selectedEventStatus) && $selectedEventStatus !== 'Aktif' && $currentUser->role !== 'administrator') {
+                              $canUpload = false;
+                              $canRequestChange = false;
+                              $canEdit = false;
+                              $canVerify = false;
+                              $canReject = false;
+                          }
                         @endphp
+                        {{-- Tampilkan tombol upload berkas untuk peserta --}}
                         @if($canUpload)
-                          <a href="{{ route('event-participant.upload.form', $participant->id) }}" class="btn btn-primary btn-sm">Upload Berkas</a>
-                        @elseif($participant->status_verifikasi === 'sedang_diverifikasi')
+                          <a href="{{ route('event-participant.upload.form', $participant->id) }}" class="btn btn-primary btn-sm mb-1">Upload Berkas</a>
+                        @endif
+                        {{-- Peserta dapat meminta perubahan data jika belum diverifikasi --}}
+                        @if($canRequestChange)
+                          <a href="{{ route('event-participant.request-change.form', $participant->id) }}" class="btn btn-warning btn-sm mb-1">Minta Perubahan</a>
+                        @endif
+                        {{-- Admin dan operator dapat mengedit data peserta sebelum verifikasi berhasil --}}
+                        @if($canEdit)
+                          <a href="{{ route('peserta.edit', $participant->user->id) }}" class="btn btn-info btn-sm mb-1">Edit Data</a>
+                        @endif
+                        {{-- Verifikasi dan penolakan oleh admin/operator ketika status sedang diverifikasi --}}
+                        @if($participant->status_verifikasi === 'sedang_diverifikasi')
                           @if($canVerify)
                             <form action="{{ route('event-participant.verify', $participant->id) }}" method="POST" style="display:inline-block;">
                               @csrf
-                              <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Terima verifikasi berkas peserta ini?')">Verifikasi</button>
+                              <button type="submit" class="btn btn-success btn-sm mb-1" onclick="return confirm('Terima verifikasi berkas peserta ini?')">Verifikasi</button>
                             </form>
                           @endif
                           @if($canReject)
-                            <form action="{{ route('event-participant.reject', $participant->id) }}" method="POST" style="display:inline-block; margin-left:4px;">
+                            <form action="{{ route('event-participant.reject', $participant->id) }}" method="POST" style="display:inline-block;">
                               @csrf
                               <input type="text" name="reason" class="form-control form-control-sm mb-1" placeholder="Catatan penolakan" required>
-                              <button type="submit" class="btn btn-danger btn-sm">Tolak</button>
+                              <button type="submit" class="btn btn-danger btn-sm mb-1">Tolak</button>
                             </form>
                           @endif
-                        @else
+                        @endif
+                        {{-- Jika tidak ada tindakan tersedia, tampilkan strip --}}
+                        @if(!$canUpload && !$canRequestChange && !$canEdit && $participant->status_verifikasi !== 'sedang_diverifikasi')
                           &mdash;
                         @endif
                       </td>
@@ -209,7 +242,9 @@
       <div class="row mb-3">
         <div class="col-12 d-flex justify-content-between align-items-center">
           <h4>Daftar Event</h4>
-          <a href="{{ route('event.create') }}" class="btn btn-primary">Buat Event Baru</a>
+          @if(auth()->user()->role === 'administrator')
+            <a href="{{ route('event.create') }}" class="btn btn-primary">Buat Event Baru</a>
+          @endif
         </div>
       </div>
       <div class="row mb-3">
@@ -242,7 +277,20 @@
                   </small>
                 </p>
                 <p class="mb-2">Status: <span class="badge badge-{{ $event->statusClass() }}">{{ $event->status() }}</span></p>
-                <a href="{{ route('home.event', $event->slug) }}" class="btn btn-primary btn-sm">Kelola Event</a>
+                @php
+                  $role = auth()->user()->role;
+                  $status = $event->status();
+                  $btnLabel = 'Kelola Event';
+                  if ($role !== 'administrator') {
+                      // Untuk operator desa dan peserta: label bergantung pada status event
+                      if ($status === 'Aktif') {
+                          $btnLabel = 'Masuk Event';
+                      } else {
+                          $btnLabel = 'Lihat Event';
+                      }
+                  }
+                @endphp
+                <a href="{{ route('home.event', $event->slug) }}" class="btn btn-primary btn-sm">{{ $btnLabel }}</a>
               </div>
             </div>
           </div>

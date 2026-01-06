@@ -28,7 +28,8 @@ class EventParticipant extends Model
     * - request_message: permintaan perubahan data dari peserta.
     * - kk_path: path ke file Kartu Keluarga yang diunggah.
     * - akta_path: path ke file Akta Kelahiran yang diunggah.
-    * - ktp_path: path ke file KTP atau kartu pelajar yang diunggah.
+     * - ktp_path: path ke file KTP atau kartu pelajar yang diunggah.
+     * - photo_path: path ke foto peserta dengan latar belakang merah.
      */
     protected $fillable = [
         'user_id',
@@ -41,6 +42,7 @@ class EventParticipant extends Model
         'kk_path',
         'akta_path',
         'ktp_path',
+        'photo_path',
     ];
 
     /**

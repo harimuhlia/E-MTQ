@@ -20,11 +20,9 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->enum('role', ['administrator', 'admin_desa', 'peserta']);
-            $table->string('terms');
             $table->foreignId('desa_id')->constrained();
             $table->date('tanggal_lahir');
             $table->string('nik', 16)->unique();
-            $table->string('foto')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

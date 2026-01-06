@@ -24,8 +24,21 @@ class AnnouncementController extends Controller
      */
     public function index()
     {
-        $announcements = Announcement::with('user')->latest()->paginate(10);
         $user = auth()->user();
+        // Filter announcements by the selected event. If no event is selected,
+        // return an empty paginator so that no announcements are shown. This
+        // prevents announcements created for one event from appearing in other
+        // events as reported by the user.
+        $selectedEventId = session('selected_event_id');
+        if ($selectedEventId) {
+            $announcements = Announcement::where('detail_event_id', $selectedEventId)
+                ->with('user')
+                ->latest()
+                ->paginate(10);
+        } else {
+            // Create an empty collection with pagination to avoid errors in the view
+            $announcements = Announcement::whereRaw('1 = 0')->paginate(10);
+        }
         return view('announcements.index', compact('announcements', 'user'));
     }
 
@@ -36,7 +49,13 @@ class AnnouncementController extends Controller
     {
         // Only superadmin can create
         $this->authorizeAdmin();
-        return view('announcements.create');
+        // Require an event to be selected before creating an announcement
+        $selectedEventId = session('selected_event_id');
+        if (! $selectedEventId) {
+            return redirect()->route('home')->with('error', 'Pilih event terlebih dahulu sebelum membuat pengumuman.');
+        }
+        $event = \App\Models\DetailEvent::find($selectedEventId);
+        return view('announcements.create', compact('event'));
     }
 
     /**
@@ -45,6 +64,11 @@ class AnnouncementController extends Controller
     public function store(Request $request)
     {
         $this->authorizeAdmin();
+        // Ensure an event is selected; announcements are tied to an event
+        $selectedEventId = session('selected_event_id');
+        if (! $selectedEventId) {
+            return redirect()->route('home')->with('error', 'Pilih event terlebih dahulu sebelum membuat pengumuman.');
+        }
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
@@ -53,6 +77,7 @@ class AnnouncementController extends Controller
             'title' => $validated['title'],
             'content' => $validated['content'],
             'user_id' => auth()->id(),
+            'detail_event_id' => $selectedEventId,
         ]);
         return redirect()->route('announcements.index')->with('success', 'Pengumuman berhasil dibuat.');
     }
@@ -62,6 +87,12 @@ class AnnouncementController extends Controller
      */
     public function show(Announcement $announcement)
     {
+        // Only display announcement if it belongs to the selected event (if any)
+        $selectedEventId = session('selected_event_id');
+        if ($selectedEventId && $announcement->detail_event_id != $selectedEventId) {
+            // If an announcement is requested outside of its event context, deny access
+            abort(403);
+        }
         return view('announcements.show', compact('announcement'));
     }
 

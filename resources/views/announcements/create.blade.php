@@ -23,6 +23,12 @@
           <form action="{{ route('announcements.store') }}" method="POST">
             @csrf
             <div class="card-body">
+              @if(isset($event))
+                <div class="alert alert-info">
+                  Pengumuman ini akan ditampilkan untuk event: <strong>{{ $event->nama_kegiatan_aktif }}</strong>
+                </div>
+              @endif
+              <input type="hidden" name="detail_event_id" value="{{ session('selected_event_id') }}">
               <div class="form-group">
                 <label for="title">Judul</label>
                 <input type="text" name="title" class="form-control" value="{{ old('title') }}" required>

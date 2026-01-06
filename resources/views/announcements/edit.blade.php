@@ -24,6 +24,11 @@
             @csrf
             @method('PUT')
             <div class="card-body">
+              @if($announcement->detailEvent)
+              <div class="alert alert-info">
+                Pengumuman ini terkait dengan event: <strong>{{ $announcement->detailEvent->nama_kegiatan_aktif }}</strong>
+              </div>
+              @endif
               <div class="form-group">
                 <label for="title">Judul</label>
                 <input type="text" name="title" class="form-control" value="{{ old('title', $announcement->title) }}" required>

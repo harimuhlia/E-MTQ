@@ -45,6 +45,13 @@
                   <small class="form-text text-muted">Berkas sudah diunggah: {{ basename($participant->ktp_path) }}</small>
                 @endif
               </div>
+              <div class="form-group">
+                <label for="photo">Foto Peserta (latar belakang merah)</label>
+                <input type="file" name="photo" class="form-control-file" accept=".jpg,.jpeg,.png">
+                @if($participant->photo_path)
+                  <small class="form-text text-muted">Foto sudah diunggah: {{ basename($participant->photo_path) }}</small>
+                @endif
+              </div>
             </div>
             <div class="card-footer">
               <button type="submit" class="btn btn-primary">Kirim Berkas</button>

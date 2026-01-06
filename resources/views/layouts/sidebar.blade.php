@@ -32,6 +32,25 @@
   
       <!-- Sidebar Menu -->
       <nav class="mt-2">
+        {{--
+            Pull the current user's role once at the beginning of the sidebar so it can be reused
+            throughout the menu. Without defining $role in this wider scope, references to
+            $role outside nested conditions may trigger an "Undefined variable" error.  See
+            error reported by user and screenshot. --}}
+        @php
+            /** @var \App\Models\User|null $currentUser */
+            $currentUser = auth()->user();
+            $role = $currentUser ? $currentUser->role : null;
+            // Determine selected event status. This is used to hide create/update/delete
+            // actions when the event is not active for non-administrators. If no event
+            // is selected, status remains null.
+            $selectedEventId = session('selected_event_id');
+            $selectedEventStatus = null;
+            if ($selectedEventId) {
+                $selEvent = \App\Models\DetailEvent::find($selectedEventId);
+                $selectedEventStatus = $selEvent ? $selEvent->status() : null;
+            }
+        @endphp
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <!-- Dashboard always visible -->
           <li class="nav-item">
@@ -43,7 +62,7 @@
 
           <!-- Only show event-related menus if an event has been selected -->
           @if(session('selected_event_id'))
-            @php $role = auth()->user()->role; @endphp
+            {{-- User role is defined globally at the top of the sidebar. --}}
             <!-- Data Master: only administrator can manage cabang & golongan -->
             @if($role === 'administrator')
             <li class="nav-item has-treeview {{ request()->is('cabang*') || request()->is('golongan*') ? 'menu-open' : '' }}">
@@ -71,8 +90,13 @@
             </li>
             @endif
 
-            <!-- Pendaftaran: accessible to administrator and admin_desa -->
-            @if(in_array($role, ['administrator', 'admin_desa']))
+          <!-- Pendaftaran: hanya tersedia ketika event aktif untuk admin_desa; administrator selalu dapat mengakses -->
+          @if(in_array($role, ['administrator', 'admin_desa']) && session('selected_event_id'))
+            @php
+                $showFormDaftar = ($role === 'administrator') || ($selectedEventStatus === 'Aktif');
+                $showListPeserta = ($role === 'administrator') || ($selectedEventStatus === 'Aktif');
+            @endphp
+            @if($role === 'administrator' || $selectedEventStatus === 'Aktif')
             <li class="nav-item has-treeview {{ request()->is('peserta/create') || (request()->is('home*') && session('selected_event_id')) || request()->is('peserta') ? 'menu-open' : '' }}">
               <a href="#" class="nav-link {{ request()->is('peserta/create') || (request()->is('home*') && session('selected_event_id')) || request()->is('peserta') ? 'active' : '' }}">
                 <i class="nav-icon fas fa-edit"></i>
@@ -82,27 +106,32 @@
                 </p>
               </a>
               <ul class="nav nav-treeview">
+                @if($showFormDaftar)
                 <li class="nav-item">
                   <a href="{{ route('peserta.create') }}" class="nav-link {{ request()->is('peserta/create') ? 'active' : '' }}">
                     <i class="far fa-circle nav-icon"></i>
                     <p>Form Daftar</p>
                   </a>
                 </li>
+                @endif
                 <li class="nav-item">
                   <a href="{{ route('home') }}" class="nav-link {{ request()->is('home*') && session('selected_event_id') ? 'active' : '' }}">
                     <i class="far fa-circle nav-icon"></i>
                     <p>Verifikasi Pendaftar</p>
                   </a>
                 </li>
+                @if($showListPeserta)
                 <li class="nav-item">
                   <a href="{{ route('peserta.index') }}" class="nav-link {{ request()->is('peserta') ? 'active' : '' }}">
                     <i class="far fa-circle nav-icon"></i>
                     <p>List Peserta</p>
                   </a>
                 </li>
+                @endif
               </ul>
             </li>
             @endif
+          @endif
 
             <!-- Pengumuman: visible to all roles -->
             <li class="nav-item">

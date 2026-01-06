@@ -72,31 +72,39 @@ class HomeController extends Controller
         $selectedId = session('selected_event_id');
         $selectedEvent = null;
         $metrics = [];
-        $eventParticipants = [];
+        $eventParticipants = collect();
         if ($selectedId) {
             $selectedEvent = DetailEvent::find($selectedId);
             if ($selectedEvent) {
-                // Hitung statistik pendaftar per status verifikasi menggunakan enumerasi baru
-                $metrics['total'] = EventParticipant::where('detail_event_id', $selectedId)->count();
-                $metrics['belum_verifikasi'] = EventParticipant::where('detail_event_id', $selectedId)
-                    ->where('status_verifikasi', 'belum_verifikasi')
-                    ->count();
-                $metrics['sedang_diverifikasi'] = EventParticipant::where('detail_event_id', $selectedId)
-                    ->where('status_verifikasi', 'sedang_diverifikasi')
-                    ->count();
-                $metrics['verifikasi_gagal'] = EventParticipant::where('detail_event_id', $selectedId)
-                    ->where('status_verifikasi', 'verifikasi_gagal')
-                    ->count();
-                $metrics['verifikasi_berhasil'] = EventParticipant::where('detail_event_id', $selectedId)
-                    ->where('status_verifikasi', 'verifikasi_berhasil')
-                    ->count();
-                // Ambil daftar peserta untuk event terpilih beserta relasi yang diperlukan
-                $eventParticipants = EventParticipant::where('detail_event_id', $selectedId)
+                // Ambil seluruh peserta terdaftar untuk event terpilih
+                $allParticipants = EventParticipant::where('detail_event_id', $selectedId)
                     ->with(['user.desa', 'cabang', 'golongan'])
                     ->get();
+                $currentUser = auth()->user();
+                // Filter peserta berdasarkan peran: admin_desa hanya melihat peserta dari desanya, peserta melihat dirinya sendiri
+                if ($currentUser && $currentUser->role === 'admin_desa') {
+                    $eventParticipants = $allParticipants->filter(function ($p) use ($currentUser) {
+                        return $p->user && $p->user->desa_id === $currentUser->desa_id;
+                    });
+                } elseif ($currentUser && $currentUser->role === 'peserta') {
+                    $eventParticipants = $allParticipants->filter(function ($p) use ($currentUser) {
+                        return $p->user_id === $currentUser->id;
+                    });
+                } else {
+                    // administrator sees all participants
+                    $eventParticipants = $allParticipants;
+                }
+                // Hitung statistik berdasarkan peserta yang dapat dilihat
+                $metrics['total'] = $eventParticipants->count();
+                $metrics['belum_verifikasi'] = $eventParticipants->where('status_verifikasi', 'belum_verifikasi')->count();
+                $metrics['sedang_diverifikasi'] = $eventParticipants->where('status_verifikasi', 'sedang_diverifikasi')->count();
+                $metrics['verifikasi_gagal'] = $eventParticipants->where('status_verifikasi', 'verifikasi_gagal')->count();
+                $metrics['verifikasi_berhasil'] = $eventParticipants->where('status_verifikasi', 'verifikasi_berhasil')->count();
             }
         }
 
+        // Determine status of selected event for view logic
+        $selectedEventStatus = $selectedEvent ? $selectedEvent->status() : null;
         return view('home', [
             'events' => $events,
             'years' => $years,
@@ -105,6 +113,7 @@ class HomeController extends Controller
             'selectedEvent' => $selectedEvent,
             'metrics' => $metrics,
             'eventParticipants' => $eventParticipants,
+            'selectedEventStatus' => $selectedEventStatus,
         ]);
     }
 

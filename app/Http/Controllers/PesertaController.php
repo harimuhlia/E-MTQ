@@ -7,6 +7,7 @@ use App\Models\Cabang;
 use App\Models\Golongan;
 use App\Models\Desa;
 use App\Models\EventParticipant;
+use App\Models\DetailEvent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -59,6 +60,11 @@ class PesertaController extends Controller
         if (!$eventId) {
             return redirect()->route('home')->with('error', 'Pilih event terlebih dahulu sebelum menambah peserta.');
         }
+        // Pastikan event masih aktif untuk pendaftaran jika user bukan administrator
+        $event = \App\Models\DetailEvent::find($eventId);
+        if ($user->role !== 'administrator' && $event && $event->status() !== 'Aktif') {
+            return redirect()->route('home')->with('error', 'Event ini tidak sedang membuka pendaftaran.');
+        }
         // Ambil cabang untuk event terpilih
         $cabangs = Cabang::where('detail_event_id', $eventId)->get();
         // Jika superadmin, ambil daftar desa untuk pilihan
@@ -82,6 +88,11 @@ class PesertaController extends Controller
         $eventId = session('selected_event_id');
         if (!$eventId) {
             return redirect()->route('home')->with('error', 'Pilih event terlebih dahulu sebelum menambah peserta.');
+        }
+        // Pastikan event masih aktif untuk pendaftaran jika user bukan administrator
+        $event = \App\Models\DetailEvent::find($eventId);
+        if ($user->role !== 'administrator' && $event && $event->status() !== 'Aktif') {
+            return redirect()->route('home')->with('error', 'Event ini tidak sedang membuka pendaftaran.');
         }
         // Validasi input
         $validated = $request->validate([
@@ -118,5 +129,185 @@ class PesertaController extends Controller
             'request_message' => null,
         ]);
         return redirect()->route('home')->with('success', 'Peserta berhasil didaftarkan.');
+    }
+
+    /**
+     * Show the form for editing a participant (user with role 'peserta') for the selected event.
+     *
+     * Only superadmin or operator of the same desa may edit a participant. Editing is
+     * prohibited once the participant's verification status is verifikasi_berhasil. The
+     * event must be selected in the session in order to determine available cabang and
+     * golongan choices.
+     *
+     * @param  \App\Models\User  $peserta  The participant to edit
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function edit(User $peserta)
+    {
+        $currentUser = auth()->user();
+        // Only administrator or admin_desa may edit
+        if (! in_array($currentUser->role, ['administrator', 'admin_desa'])) {
+            abort(403);
+        }
+        // Ensure the user being edited is a participant
+        if ($peserta->role !== 'peserta') {
+            abort(404);
+        }
+        // Event must be selected
+        $eventId = session('selected_event_id');
+        if (! $eventId) {
+            return redirect()->route('home')->with('error', 'Pilih event terlebih dahulu sebelum mengedit peserta.');
+        }
+        // Retrieve the event participant record for this event
+        $eventParticipant = EventParticipant::where('detail_event_id', $eventId)
+            ->where('user_id', $peserta->id)
+            ->first();
+        if (! $eventParticipant) {
+            return redirect()->route('home')->with('error', 'Peserta tidak terdaftar pada event ini.');
+        }
+        // Disallow editing after verification success
+        if ($eventParticipant->status_verifikasi === 'verifikasi_berhasil') {
+            return redirect()->route('home')->with('error', 'Data peserta tidak dapat diubah setelah verifikasi berhasil.');
+        }
+        // Cegah operator mengedit jika event tidak aktif
+        $event = DetailEvent::find($eventId);
+        if ($currentUser->role !== 'administrator' && $event && $event->status() !== 'Aktif') {
+            return redirect()->route('home')->with('error', 'Event ini tidak sedang berlangsung, data peserta tidak dapat diubah.');
+        }
+        // Operator may only edit participants from their own desa
+        if ($currentUser->role === 'admin_desa' && $peserta->desa_id != $currentUser->desa_id) {
+            abort(403);
+        }
+        // Prepare options for cabang and desa
+        $cabangs = Cabang::where('detail_event_id', $eventId)->get();
+        $desas = [];
+        if ($currentUser->role === 'administrator') {
+            $desas = Desa::all();
+        }
+        // Pass current user role to view for conditional display
+        $currentUserRole = $currentUser->role;
+        return view('peserta.edit', compact('peserta', 'eventParticipant', 'cabangs', 'desas', 'currentUserRole'));
+    }
+
+    /**
+     * Update a participant's data for the selected event.
+     *
+     * Similar authorization rules apply as in the edit method. Only administrator or
+     * admin_desa may update, and only before verification is successful. Superadmin may
+     * change the participant's desa, while operators cannot. Any pending request message
+     * will be cleared upon successful update.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\User  $peserta
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function update(Request $request, User $peserta)
+    {
+        $currentUser = auth()->user();
+        if (! in_array($currentUser->role, ['administrator', 'admin_desa'])) {
+            abort(403);
+        }
+        if ($peserta->role !== 'peserta') {
+            abort(404);
+        }
+        $eventId = session('selected_event_id');
+        if (! $eventId) {
+            return redirect()->route('home')->with('error', 'Pilih event terlebih dahulu sebelum memperbarui peserta.');
+        }
+        $eventParticipant = EventParticipant::where('detail_event_id', $eventId)
+            ->where('user_id', $peserta->id)
+            ->first();
+        if (! $eventParticipant) {
+            return redirect()->route('home')->with('error', 'Peserta tidak terdaftar pada event ini.');
+        }
+        if ($eventParticipant->status_verifikasi === 'verifikasi_berhasil') {
+            return redirect()->route('home')->with('error', 'Data peserta tidak dapat diubah setelah verifikasi berhasil.');
+        }
+        // Cegah operator memperbarui jika event tidak aktif
+        $event = DetailEvent::find($eventId);
+        if ($currentUser->role !== 'administrator' && $event && $event->status() !== 'Aktif') {
+            return redirect()->route('home')->with('error', 'Event ini tidak sedang berlangsung, data peserta tidak dapat diubah.');
+        }
+        if ($currentUser->role === 'admin_desa' && $peserta->desa_id != $currentUser->desa_id) {
+            abort(403);
+        }
+        // Validation rules: email & NIK unique except for current user
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $peserta->id,
+            'password' => 'nullable|string|min:6|confirmed',
+            'nik' => 'required|string|size:16|unique:users,nik,' . $peserta->id,
+            'tanggal_lahir' => 'required|date',
+            'cabang_id' => 'required|exists:cabangs,id',
+            'golongan_id' => 'required|exists:golongans,id',
+            'desa_id' => 'nullable|exists:desas,id',
+        ]);
+        // Update user fields
+        $peserta->name = $validated['name'];
+        $peserta->email = $validated['email'];
+        $peserta->nik = $validated['nik'];
+        $peserta->tanggal_lahir = $validated['tanggal_lahir'];
+        // Allow desa change only for administrator
+        if ($currentUser->role === 'administrator') {
+            $peserta->desa_id = $validated['desa_id'] ?? $peserta->desa_id;
+        }
+        if (! empty($validated['password'])) {
+            $peserta->password = Hash::make($validated['password']);
+        }
+        $peserta->save();
+        // Update pivot data
+        $eventParticipant->cabang_id = $validated['cabang_id'];
+        $eventParticipant->golongan_id = $validated['golongan_id'];
+        // Clear any existing request message since data has been updated
+        $eventParticipant->request_message = null;
+        $eventParticipant->save();
+        return redirect()->route('home')->with('success', 'Data peserta berhasil diperbarui.');
+    }
+
+    /**
+     * Remove a participant from the selected event.
+     *
+     * This method does not delete the user record entirely—only their registration
+     * within the selected event. The operation is allowed only to administrators
+     * and admin_desa of the same desa, provided the participant has not been
+     * successfully verified. After deletion, the participant may still exist
+     * for other events.
+     *
+     * @param  \App\Models\User  $peserta
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function destroy(User $peserta)
+    {
+        $currentUser = auth()->user();
+        if (! in_array($currentUser->role, ['administrator', 'admin_desa'])) {
+            abort(403);
+        }
+        if ($peserta->role !== 'peserta') {
+            abort(404);
+        }
+        $eventId = session('selected_event_id');
+        if (! $eventId) {
+            return redirect()->route('home')->with('error', 'Pilih event terlebih dahulu sebelum menghapus peserta.');
+        }
+        $eventParticipant = EventParticipant::where('detail_event_id', $eventId)
+            ->where('user_id', $peserta->id)
+            ->first();
+        if (! $eventParticipant) {
+            return redirect()->back()->with('error', 'Peserta tidak terdaftar pada event ini.');
+        }
+        // Do not allow deletion after verification success
+        if ($eventParticipant->status_verifikasi === 'verifikasi_berhasil') {
+            return redirect()->back()->with('error', 'Peserta telah diverifikasi, tidak dapat dihapus.');
+        }
+        // Cegah operator menghapus jika event tidak aktif
+        $event = DetailEvent::find($eventId);
+        if ($currentUser->role !== 'administrator' && $event && $event->status() !== 'Aktif') {
+            return redirect()->back()->with('error', 'Event ini tidak sedang berlangsung, peserta tidak dapat dihapus.');
+        }
+        if ($currentUser->role === 'admin_desa' && $peserta->desa_id != $currentUser->desa_id) {
+            abort(403);
+        }
+        $eventParticipant->delete();
+        return redirect()->back()->with('success', 'Peserta berhasil dihapus dari event.');
     }
 }

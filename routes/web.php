@@ -32,11 +32,11 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 Route::middleware(['auth'])->group(function () {
     // Dashboard home & event selection
     Route::get('/home', [HomeController::class, 'index'])->name('home');
-    // Event dashboard and selecting event are limited to administrators and operator (admin_desa)
-    Route::middleware('role:administrator,admin_desa')->group(function () {
-        Route::get('/home/event/{slug}', [HomeController::class, 'event'])->name('home.event');
-        Route::get('/home/select-event/{id}', [HomeController::class, 'selectEvent'])->name('home.select_event');
-    });
+    // Event dashboard and selecting event
+    // Semua user yang telah login dapat mengakses halaman event; pembatasan hak akses
+    // (kelola/lihat/masuk) diatur melalui controller dan view berdasarkan peran dan status event.
+    Route::get('/home/event/{slug}', [HomeController::class, 'event'])->name('home.event');
+    Route::get('/home/select-event/{id}', [HomeController::class, 'selectEvent'])->name('home.select_event');
 
     // Routes accessible only to superadmin (administrator)
     Route::middleware('role:administrator')->group(function () {
@@ -45,8 +45,8 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('golongan', GolonganController::class);
         Route::resource('event', DetailEventController::class);
         Route::resource('operator', OperatorController::class);
-        // Pengumuman: hanya superadmin dapat menambah/mengubah/menghapus
-        Route::resource('announcements', \App\Http\Controllers\AnnouncementController::class);
+        // Pengumuman: superadmin dapat menambah, mengubah, dan menghapus; index & show handled separately below
+        Route::resource('announcements', \App\Http\Controllers\AnnouncementController::class)->except(['index', 'show']);
     });
 
     // Routes accessible to superadmin and admin desa (pendaftaran & verifikasi)
@@ -68,5 +68,10 @@ Route::middleware(['auth'])->group(function () {
     // Announcements index & show: semua dapat melihat
     Route::get('announcements', [\App\Http\Controllers\AnnouncementController::class, 'index'])->name('announcements.index');
     Route::get('announcements/{announcement}', [\App\Http\Controllers\AnnouncementController::class, 'show'])->name('announcements.show');
+
+    // Permintaan perubahan data peserta
+    // Peserta dapat mengajukan permintaan perbaikan data sebelum verifikasi final
+    Route::get('/event-participant/{participant}/request-change', [\App\Http\Controllers\EventParticipantController::class, 'requestChangeForm'])->name('event-participant.request-change.form');
+    Route::post('/event-participant/{participant}/request-change', [\App\Http\Controllers\EventParticipantController::class, 'requestChange'])->name('event-participant.request-change');
 });
 

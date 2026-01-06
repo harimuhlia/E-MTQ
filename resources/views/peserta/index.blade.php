@@ -8,7 +8,19 @@
     <div class="row mb-3">
       <div class="col-12 d-flex justify-content-between align-items-center">
         <h4>Daftar Peserta</h4>
-        @if(in_array($currentUser->role, ['admin_desa', 'administrator']))
+        @php
+          // Determine selected event status to conditionally show the create button.
+          $selectedEventStatus = null;
+          if(session('selected_event_id')) {
+              $ev = \App\Models\DetailEvent::find(session('selected_event_id'));
+              $selectedEventStatus = $ev ? $ev->status() : null;
+          }
+        @endphp
+        @if($currentUser && $currentUser->role === 'administrator')
+          <!-- Administrator always allowed to add participants -->
+          <a href="{{ route('peserta.create') }}" class="btn btn-primary">Tambah Peserta</a>
+        @elseif($currentUser && $currentUser->role === 'admin_desa' && $selectedEventStatus === 'Aktif')
+          <!-- Operator desa only allowed to add participants during an active event -->
           <a href="{{ route('peserta.create') }}" class="btn btn-primary">Tambah Peserta</a>
         @endif
       </div>

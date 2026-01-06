@@ -42,6 +42,10 @@ class EventParticipantController extends Controller
         if ($currentUser->role !== 'peserta' || $participant->user_id !== $currentUser->id) {
             abort(403);
         }
+        // Cek status event: peserta hanya dapat mengunggah berkas ketika event aktif
+        if ($participant->detailEvent && $participant->detailEvent->status() !== 'Aktif') {
+            return redirect()->route('home')->with('error', 'Event ini tidak sedang berlangsung, tidak dapat mengunggah berkas.');
+        }
         return view('event_participant.upload', compact('participant'));
     }
 
@@ -63,14 +67,20 @@ class EventParticipantController extends Controller
         if ($currentUser->role !== 'peserta' || $participant->user_id !== $currentUser->id) {
             abort(403);
         }
+        // Cek status event: peserta hanya dapat mengunggah berkas ketika event aktif
+        if ($participant->detailEvent && $participant->detailEvent->status() !== 'Aktif') {
+            return redirect()->route('home')->with('error', 'Event ini tidak sedang berlangsung, tidak dapat mengunggah berkas.');
+        }
         // Validasi berkas; semua dokumen optional, tetapi setidaknya satu harus ada
         $validated = $request->validate([
             'kk' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'akta' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'ktp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
-        if (!$request->hasFile('kk') && !$request->hasFile('akta') && !$request->hasFile('ktp')) {
-            return redirect()->back()->with('error', 'Anda harus mengunggah setidaknya satu berkas.');
+        // Pastikan ada berkas yang diunggah. Peserta harus mengunggah setidaknya satu dokumen atau foto.
+        if (!$request->hasFile('kk') && !$request->hasFile('akta') && !$request->hasFile('ktp') && !$request->hasFile('photo')) {
+            return redirect()->back()->with('error', 'Anda harus mengunggah setidaknya satu berkas atau foto.');
         }
         // Simpan berkas dan update path jika diupload
         if ($request->hasFile('kk')) {
@@ -85,10 +95,72 @@ class EventParticipantController extends Controller
             $path = $request->file('ktp')->store('verification', 'public');
             $participant->ktp_path = $path;
         }
+        if ($request->hasFile('photo')) {
+            $path = $request->file('photo')->store('verification', 'public');
+            $participant->photo_path = $path;
+        }
         // Set status menjadi sedang_diverifikasi
         $participant->status_verifikasi = 'sedang_diverifikasi';
         $participant->save();
         return redirect()->route('home')->with('success', 'Berkas berhasil diunggah, menunggu verifikasi.');
+    }
+
+    /**
+     * Tampilkan form permintaan perubahan data oleh peserta.
+     *
+     * Peserta hanya dapat mengajukan permintaan perbaikan sebelum verifikasi
+     * berhasil. Form ini memungkinkan peserta memasukkan pesan permintaan yang
+     * disimpan dalam kolom request_message pada tabel event_participants.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function requestChangeForm($id)
+    {
+        $participant = EventParticipant::with('user')->findOrFail($id);
+        $currentUser = auth()->user();
+        // Only the participant themself may request a change
+        if ($currentUser->role !== 'peserta' || $participant->user_id !== $currentUser->id) {
+            abort(403);
+        }
+        // Cek status event: peserta hanya dapat meminta perubahan ketika event aktif
+        if ($participant->detailEvent && $participant->detailEvent->status() !== 'Aktif') {
+            return redirect()->route('home')->with('error', 'Event ini tidak sedang berlangsung, permintaan perubahan tidak dapat diajukan.');
+        }
+        // Request is not allowed once verification is successful
+        if ($participant->status_verifikasi === 'verifikasi_berhasil') {
+            return redirect()->back()->with('error', 'Data sudah diverifikasi, permintaan perubahan tidak dapat diajukan.');
+        }
+        return view('event_participant.request', compact('participant'));
+    }
+
+    /**
+     * Simpan permintaan perubahan data yang diajukan oleh peserta.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function requestChange(Request $request, $id)
+    {
+        $participant = EventParticipant::with('user')->findOrFail($id);
+        $currentUser = auth()->user();
+        if ($currentUser->role !== 'peserta' || $participant->user_id !== $currentUser->id) {
+            abort(403);
+        }
+        // Cek status event: peserta hanya dapat meminta perubahan ketika event aktif
+        if ($participant->detailEvent && $participant->detailEvent->status() !== 'Aktif') {
+            return redirect()->route('home')->with('error', 'Event ini tidak sedang berlangsung, permintaan perubahan tidak dapat diajukan.');
+        }
+        if ($participant->status_verifikasi === 'verifikasi_berhasil') {
+            return redirect()->back()->with('error', 'Data sudah diverifikasi, permintaan perubahan tidak dapat diajukan.');
+        }
+        $validated = $request->validate([
+            'message' => 'required|string',
+        ]);
+        $participant->request_message = $validated['message'];
+        $participant->save();
+        return redirect()->route('home')->with('success', 'Permintaan perbaikan data telah dikirim.');
     }
 
     /**
@@ -110,6 +182,10 @@ class EventParticipantController extends Controller
         }
         if (!$allowed) {
             abort(403);
+        }
+        // Cek status event: operator hanya dapat memverifikasi ketika event aktif
+        if ($currentUser->role !== 'administrator' && $participant->detailEvent && $participant->detailEvent->status() !== 'Aktif') {
+            return redirect()->back()->with('error', 'Event ini tidak sedang berlangsung, verifikasi tidak diizinkan.');
         }
         // Hanya dapat diverifikasi jika sedang dalam status sedang_diverifikasi
         if ($participant->status_verifikasi !== 'sedang_diverifikasi') {
@@ -141,6 +217,10 @@ class EventParticipantController extends Controller
         }
         if (!$allowed) {
             abort(403);
+        }
+        // Cek status event: operator hanya dapat menolak ketika event aktif
+        if ($currentUser->role !== 'administrator' && $participant->detailEvent && $participant->detailEvent->status() !== 'Aktif') {
+            return redirect()->back()->with('error', 'Event ini tidak sedang berlangsung, penolakan tidak diizinkan.');
         }
         // Hanya dapat ditolak jika sedang dalam status sedang_diverifikasi
         if ($participant->status_verifikasi !== 'sedang_diverifikasi') {
