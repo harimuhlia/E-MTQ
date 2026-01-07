@@ -24,6 +24,12 @@
             @csrf
             <div class="card-body">
               <p>Silakan unggah dokumen yang dibutuhkan untuk verifikasi. Format yang didukung: PDF, JPG, JPEG, PNG (maks 2 MB per file).</p>
+              {{-- Jika sebelumnya berkas ditolak, tampilkan alasan penolakan agar peserta mengetahui apa yang perlu diperbaiki --}}
+              @if($participant->status_verifikasi === 'verifikasi_gagal' && $participant->catatan_verifikasi)
+                <div class="alert alert-warning">
+                  <strong>Alasan Penolakan:</strong> {{ $participant->catatan_verifikasi }}
+                </div>
+              @endif
               <div class="form-group">
                 <label for="kk">Kartu Keluarga</label>
                 <input type="file" name="kk" class="form-control-file" accept=".pdf,.jpg,.jpeg,.png">

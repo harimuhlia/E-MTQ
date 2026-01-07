@@ -36,8 +36,17 @@ class PesertaController extends Controller
     public function index()
     {
         // Ambil semua user dengan role peserta beserta desa mereka
-        $pesertas = User::where('role', 'peserta')->with('desa')->get();
         $currentUser = auth()->user();
+        // Jika operator desa, hanya tampilkan peserta dari desa yang sama
+        if ($currentUser && $currentUser->role === 'admin_desa') {
+            $pesertas = User::where('role', 'peserta')
+                ->where('desa_id', $currentUser->desa_id)
+                ->with('desa')
+                ->get();
+        } else {
+            // Administrator dan peran lainnya melihat seluruh peserta
+            $pesertas = User::where('role', 'peserta')->with('desa')->get();
+        }
         return view('peserta.index', compact('pesertas', 'currentUser'));
     }
 
@@ -66,14 +75,15 @@ class PesertaController extends Controller
         if ($user->role !== 'administrator' && $event && $event->status() !== 'Aktif') {
             return redirect()->route('home')->with('error', 'Event ini tidak sedang membuka pendaftaran.');
         }
-        // Ambil cabang untuk event terpilih
-        $cabangs = Cabang::where('detail_event_id', $eventId)->get();
-        // Jika superadmin, ambil daftar desa untuk pilihan
+        // Ambil daftar desa untuk superadmin. Operator desa tidak perlu memilih desa
+        // karena desa peserta otomatis mengikuti desa operator.
         $desas = [];
         if ($user->role === 'administrator') {
             $desas = Desa::all();
         }
-        return view('peserta.create', compact('cabangs', 'desas'));
+        // Formulir pendaftaran tidak lagi menampilkan pilihan cabang dan golongan.
+        // Cabang dan golongan akan dipilih pada halaman terpisah setelah peserta dibuat.
+        return view('peserta.create', compact('desas'));
     }
 
     /**
@@ -96,17 +106,42 @@ class PesertaController extends Controller
         if ($user->role !== 'administrator' && $event && $event->status() !== 'Aktif') {
             return redirect()->route('home')->with('error', 'Event ini tidak sedang membuka pendaftaran.');
         }
-        // Validasi input
+        // Validasi input dasar. Perhatikan bahwa NIK tidak lagi menggunakan rule unique
+        // karena keunikan peserta ditentukan berdasarkan kombinasi NIK dan event. Rule
+        // unique untuk email masih diperlukan agar tidak ada akun ganda dengan email
+        // sama.
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            // Email tidak divalidasi unik secara global karena email boleh dipakai di event lain.
+            // Unik per event diperiksa secara manual di bawah.
+            'email' => 'required|email',
             'password' => 'required|string|min:6|confirmed',
-            'nik' => 'required|string|size:16|unique:users,nik',
+            'nik' => 'required|string|size:16',
             'tanggal_lahir' => 'required|date',
-            'cabang_id' => 'required|exists:cabangs,id',
-            'golongan_id' => 'required|exists:golongans,id',
+            // Desa hanya relevan untuk superadmin; validasi nullable tetap diperlukan
             'desa_id' => 'nullable|exists:desas,id',
         ]);
+        // Cek apakah ada peserta lain dengan NIK yang sama yang sudah terdaftar di event ini
+        $existingUserIds = User::where('nik', $validated['nik'])->pluck('id');
+        if ($existingUserIds->isNotEmpty()) {
+            $existsInEvent = EventParticipant::where('detail_event_id', $eventId)
+                ->whereIn('user_id', $existingUserIds)
+                ->exists();
+            if ($existsInEvent) {
+                return redirect()->back()->withInput()->with('error', 'Peserta dengan NIK ini sudah terdaftar pada event ini.');
+            }
+        }
+        // Pastikan email belum digunakan oleh peserta lain pada event ini. Email boleh sama di event berbeda,
+        // tetapi tidak boleh digunakan oleh dua peserta berbeda pada event yang sama.
+        $emailUserIds = User::where('email', $validated['email'])->pluck('id');
+        if ($emailUserIds->isNotEmpty()) {
+            $existsInEventForEmail = EventParticipant::where('detail_event_id', $eventId)
+                ->whereIn('user_id', $emailUserIds)
+                ->exists();
+            if ($existsInEventForEmail) {
+                return redirect()->back()->withInput()->with('error', 'Email ini sudah digunakan oleh peserta lain pada event ini.');
+            }
+        }
         // Desa peserta mengikuti desa operator; untuk superadmin ambil dari input jika tersedia
         $desaId = $user->role === 'admin_desa' ? $user->desa_id : ($validated['desa_id'] ?? null);
         // Buat user baru dengan peran peserta
@@ -118,18 +153,15 @@ class PesertaController extends Controller
             'desa_id' => $desaId,
             'nik' => $validated['nik'],
             'tanggal_lahir' => $validated['tanggal_lahir'],
-            'terms' => 'accepted',
         ]);
-        // Buat entry di tabel pivot event_participants dengan status default belum_verifikasi
-        EventParticipant::create([
-            'user_id' => $newUser->id,
-            'detail_event_id' => $eventId,
-            'cabang_id' => $validated['cabang_id'],
-            'golongan_id' => $validated['golongan_id'],
-            'status_verifikasi' => 'belum_verifikasi',
-            'catatan_verifikasi' => null,
-            'request_message' => null,
-        ]);
+        // Setelah peserta dibuat, tidak langsung mendaftarkan cabang/golongan.
+        // Admin desa atau superadmin dapat memilih lomba melalui halaman terpisah.
+        // Jika user adalah admin_desa atau administrator, arahkan ke halaman pemilihan lomba.
+        if (in_array($user->role, ['admin_desa', 'administrator'])) {
+            return redirect()->route('peserta.select-lomba', [$newUser->id])
+                ->with('success', 'Peserta berhasil didaftarkan. Silakan pilih lomba untuk peserta.');
+        }
+        // Untuk peran lain (meskipun seharusnya tidak terjadi), kembali ke beranda
         return redirect()->route('home')->with('success', 'Peserta berhasil didaftarkan.');
     }
 
@@ -181,15 +213,15 @@ class PesertaController extends Controller
         if ($currentUser->role === 'admin_desa' && $peserta->desa_id != $currentUser->desa_id) {
             abort(403);
         }
-        // Prepare options for cabang and desa
-        $cabangs = Cabang::where('detail_event_id', $eventId)->get();
+        // Persiapkan daftar desa hanya untuk administrator. Cabang dan golongan tidak
+        // diperlukan pada form edit, karena pemilihan lomba dilakukan di halaman lain.
         $desas = [];
         if ($currentUser->role === 'administrator') {
             $desas = Desa::all();
         }
         // Pass current user role to view for conditional display
         $currentUserRole = $currentUser->role;
-        return view('peserta.edit', compact('peserta', 'eventParticipant', 'cabangs', 'desas', 'currentUserRole'));
+        return view('peserta.edit', compact('peserta', 'eventParticipant', 'desas', 'currentUserRole'));
     }
 
     /**
@@ -235,17 +267,43 @@ class PesertaController extends Controller
         if ($currentUser->role === 'admin_desa' && $peserta->desa_id != $currentUser->desa_id) {
             abort(403);
         }
-        // Validation rules: email & NIK unique except for current user
+        // Validation rules: email harus unik kecuali untuk user saat ini. NIK tidak lagi
+        // di-unique-kan secara global karena keunikan ditentukan oleh kombinasi NIK
+        // dan event. Namun kita cek secara manual setelah validasi untuk
+        // memastikan NIK tidak bentrok dengan peserta lain pada event yang sama.
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $peserta->id,
+            // Email tidak divalidasi unik secara global. Unik per event diperiksa manual di bawah.
+            'email' => 'required|email',
             'password' => 'nullable|string|min:6|confirmed',
-            'nik' => 'required|string|size:16|unique:users,nik,' . $peserta->id,
+            'nik' => 'required|string|size:16',
             'tanggal_lahir' => 'required|date',
-            'cabang_id' => 'required|exists:cabangs,id',
-            'golongan_id' => 'required|exists:golongans,id',
             'desa_id' => 'nullable|exists:desas,id',
         ]);
+        // Pastikan tidak ada user lain dengan NIK yang sama yang sudah terdaftar di event ini
+        $otherUserWithNik = User::where('nik', $validated['nik'])
+            ->where('id', '!=', $peserta->id)
+            ->first();
+        if ($otherUserWithNik) {
+            $registeredInEvent = EventParticipant::where('detail_event_id', $eventId)
+                ->where('user_id', $otherUserWithNik->id)
+                ->exists();
+            if ($registeredInEvent) {
+                return redirect()->back()->withInput()->with('error', 'NIK sudah digunakan oleh peserta lain pada event ini.');
+            }
+        }
+        // Pastikan tidak ada user lain dengan email yang sama yang sudah terdaftar di event ini.
+        $otherUsersWithEmail = User::where('email', $validated['email'])
+            ->where('id', '!=', $peserta->id)
+            ->pluck('id');
+        if ($otherUsersWithEmail->isNotEmpty()) {
+            $existsInEventForEmail = EventParticipant::where('detail_event_id', $eventId)
+                ->whereIn('user_id', $otherUsersWithEmail)
+                ->exists();
+            if ($existsInEventForEmail) {
+                return redirect()->back()->withInput()->with('error', 'Email sudah digunakan oleh peserta lain pada event ini.');
+            }
+        }
         // Update user fields
         $peserta->name = $validated['name'];
         $peserta->email = $validated['email'];
@@ -259,12 +317,13 @@ class PesertaController extends Controller
             $peserta->password = Hash::make($validated['password']);
         }
         $peserta->save();
-        // Update pivot data
-        $eventParticipant->cabang_id = $validated['cabang_id'];
-        $eventParticipant->golongan_id = $validated['golongan_id'];
-        // Clear any existing request message since data has been updated
-        $eventParticipant->request_message = null;
-        $eventParticipant->save();
+        // Tidak memperbarui cabang/golongan di sini karena pemilihan lomba dilakukan
+        // melalui halaman khusus. Hanya perbarui data user. Apabila ada
+        // request_message pada eventParticipant, hapus karena data telah diperbarui.
+        if ($eventParticipant) {
+            $eventParticipant->request_message = null;
+            $eventParticipant->save();
+        }
         return redirect()->route('home')->with('success', 'Data peserta berhasil diperbarui.');
     }
 
@@ -314,5 +373,167 @@ class PesertaController extends Controller
         }
         $eventParticipant->delete();
         return redirect()->back()->with('success', 'Peserta berhasil dihapus dari event.');
+    }
+
+    /**
+     * Tampilkan form pemilihan lomba untuk peserta.
+     *
+     * Halaman ini memungkinkan admin desa atau superadmin menempatkan seorang peserta
+     * ke satu atau lebih cabang/golongan lomba dalam event yang sedang dipilih.
+     * Peserta (role 'peserta') tidak dapat mengakses halaman ini.
+     *
+     * @param  \App\Models\User  $peserta
+     * @return \Illuminate\Contracts\Support\Renderable|\Illuminate\Http\RedirectResponse
+     */
+    public function selectLombaForm(User $peserta)
+    {
+        $currentUser = auth()->user();
+        // Pastikan hanya administrator atau admin_desa yang mengakses
+        if (! in_array($currentUser->role, ['administrator', 'admin_desa'])) {
+            abort(403);
+        }
+        // Pastikan yang diedit adalah peserta
+        if ($peserta->role !== 'peserta') {
+            abort(404);
+        }
+        // Pastikan event terpilih
+        $eventId = session('selected_event_id');
+        if (! $eventId) {
+            return redirect()->route('home')->with('error', 'Pilih event terlebih dahulu sebelum menambah lomba.');
+        }
+        $event = DetailEvent::find($eventId);
+        if (! $event) {
+            return redirect()->route('home')->with('error', 'Event tidak ditemukan.');
+        }
+        // Admin desa hanya dapat mengelola peserta dari desanya sendiri
+        if ($currentUser->role === 'admin_desa' && $peserta->desa_id != $currentUser->desa_id) {
+            abort(403);
+        }
+        // Operator desa hanya boleh menambah lomba ketika event aktif
+        if ($currentUser->role === 'admin_desa' && $event->status() !== 'Aktif') {
+            return redirect()->route('home')->with('error', 'Event ini tidak sedang membuka pendaftaran.');
+        }
+        // Ambil daftar cabang dan golongan untuk event terpilih
+        $cabangs = Cabang::where('detail_event_id', $eventId)->with('golongan')->get();
+        // Ambil event_participants existing for this user for event
+        $existingParticipantIds = EventParticipant::where('detail_event_id', $eventId)
+            ->where('user_id', $peserta->id)
+            ->pluck('golongan_id', 'cabang_id')->toArray();
+        return view('peserta.select_lomba', [
+            'peserta' => $peserta,
+            'cabangs' => $cabangs,
+            'existingParticipantIds' => $existingParticipantIds,
+        ]);
+    }
+
+    /**
+     * Simpan pemilihan lomba untuk peserta.
+     *
+     * Admin desa atau superadmin dapat memilih lebih dari satu cabang/golongan lomba.
+     * Metode ini akan memvalidasi usia peserta berdasarkan ketentuan pada kombinasi
+     * cabang dan golongan. Jika validasi gagal, tidak ada data yang disimpan dan
+     * pengguna diarahkan kembali dengan pesan error.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\User  $peserta
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function selectLomba(Request $request, User $peserta)
+    {
+        $currentUser = auth()->user();
+        if (! in_array($currentUser->role, ['administrator', 'admin_desa'])) {
+            abort(403);
+        }
+        if ($peserta->role !== 'peserta') {
+            abort(404);
+        }
+        // Pastikan event terpilih
+        $eventId = session('selected_event_id');
+        if (! $eventId) {
+            return redirect()->route('home')->with('error', 'Pilih event terlebih dahulu sebelum menambah lomba.');
+        }
+        $event = DetailEvent::find($eventId);
+        if (! $event) {
+            return redirect()->route('home')->with('error', 'Event tidak ditemukan.');
+        }
+        // Admin desa hanya dapat mengelola peserta dari desanya sendiri
+        if ($currentUser->role === 'admin_desa' && $peserta->desa_id != $currentUser->desa_id) {
+            abort(403);
+        }
+        // Non-administrator tidak bisa menambah lomba jika event tidak aktif
+        if ($currentUser->role !== 'administrator' && $event->status() !== 'Aktif') {
+            return redirect()->route('home')->with('error', 'Event ini tidak sedang membuka pendaftaran.');
+        }
+        // Validasi input: array of selections
+        $request->validate([
+            'lomba' => 'required|array',
+            'lomba.*' => 'required|string',
+        ], [
+            'lomba.required' => 'Silakan pilih setidaknya satu lomba.',
+        ]);
+        $selections = $request->input('lomba');
+        // Prepare to collect age validation errors
+        $errors = [];
+        // Use Carbon for age computation
+        $pesertaBirth = \Carbon\Carbon::parse($peserta->tanggal_lahir);
+        $eventDate = $event->waktu_pelaksanaan_mulai ?: now();
+        $age = $pesertaBirth->diffInYears($eventDate);
+        foreach ($selections as $selection) {
+            // Expect selection string in format cabangId-golonganId
+            [$cabangId, $golonganId] = explode('-', $selection);
+            // Check if already exists
+            $exists = EventParticipant::where('detail_event_id', $eventId)
+                ->where('user_id', $peserta->id)
+                ->where('cabang_id', $cabangId)
+                ->where('golongan_id', $golonganId)
+                ->exists();
+            if ($exists) {
+                continue; // skip duplicates
+            }
+            // Validate age based on ketentuan usia or golongan max_usia
+            $ketentuan = \App\Models\KetentuanUsia::where('cabang_id', $cabangId)
+                ->where('golongan_id', $golonganId)
+                ->first();
+            if ($ketentuan) {
+                $minDate = \Carbon\Carbon::parse($ketentuan->min_usia);
+                $maxDate = \Carbon\Carbon::parse($ketentuan->max_usia);
+                if ($pesertaBirth->lt($minDate) || $pesertaBirth->gt($maxDate)) {
+                    $errors[] = 'Usia peserta tidak memenuhi ketentuan usia untuk cabang dan golongan yang dipilih.';
+                    continue;
+                }
+            } else {
+                // fallback to golongan max_usia
+                $gol = \App\Models\Golongan::find($golonganId);
+                if ($gol && $gol->max_usia && $age > $gol->max_usia) {
+                    $errors[] = 'Usia peserta melebihi batas maksimal untuk golongan ' . ($gol->nama ?? '') . '.';
+                    continue;
+                }
+            }
+        }
+        if (! empty($errors)) {
+            return redirect()->back()->withInput()->with('error', implode(' ', $errors));
+        }
+        // Create event_participants for each valid selection
+        foreach ($selections as $selection) {
+            [$cabangId, $golonganId] = explode('-', $selection);
+            $exists = EventParticipant::where('detail_event_id', $eventId)
+                ->where('user_id', $peserta->id)
+                ->where('cabang_id', $cabangId)
+                ->where('golongan_id', $golonganId)
+                ->exists();
+            if ($exists) {
+                continue;
+            }
+            EventParticipant::create([
+                'user_id' => $peserta->id,
+                'detail_event_id' => $eventId,
+                'cabang_id' => $cabangId,
+                'golongan_id' => $golonganId,
+                'status_verifikasi' => 'belum_verifikasi',
+                'catatan_verifikasi' => null,
+                'request_message' => null,
+            ]);
+        }
+        return redirect()->route('home')->with('success', 'Lomba peserta berhasil disimpan.');
     }
 }

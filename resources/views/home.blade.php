@@ -10,11 +10,16 @@
       <div class="row mb-3">
         <div class="col-12 d-flex justify-content-between align-items-center">
           <h4>Event Terpilih: {{ $selectedEvent->nama_kegiatan_aktif }}</h4>
+          @php $currentUser = auth()->user(); @endphp
+          @if(!$currentUser || $currentUser->role !== 'peserta')
           <a href="{{ route('home.select_event', 0) }}" class="btn btn-secondary btn-sm">Pilih Event Lain</a>
+          @endif
         </div>
       </div>
+      @php $currentHomeUser = auth()->user(); @endphp
+      @if($currentHomeUser && $currentHomeUser->role === 'administrator')
       <div class="row">
-        <!-- Informasi jumlah peserta berdasarkan status verifikasi -->
+        <!-- Informasi jumlah peserta berdasarkan status verifikasi (hanya untuk administrator) -->
         <div class="col-md-3 col-sm-6">
           <div class="info-box bg-info">
             <span class="info-box-icon"><i class="far fa-bookmark"></i></span>
@@ -61,6 +66,7 @@
           </div>
         </div>
       </div>
+      @endif
 
       <!-- Detail jadwal event -->
       <div class="row mt-4">
@@ -148,6 +154,7 @@
                     <th>Golongan</th>
                     <th>Status Verifikasi</th>
                     <th>Permintaan Data</th>
+                    <th>Alasan Penolakan</th>
                     <th>Aksi</th>
                   </tr>
                 </thead>
@@ -182,6 +189,10 @@
                         {{ $participant->request_message ?? '—' }}
                       </td>
                       <td>
+                        {{-- Tampilkan alasan verifikasi gagal untuk peserta --}}
+                        {{ $participant->catatan_verifikasi ?? '—' }}
+                      </td>
+                      <td>
                         @php
                           // Tentukan hak aksi berdasarkan peran dan asal desa
                           $canVerify = false;
@@ -193,18 +204,25 @@
                               $canVerify = true;
                               $canReject = true;
                               $canEdit = true;
+                              // Administrator dapat meminta perubahan sebelum verifikasi berhasil
+                              if ($participant->status_verifikasi !== 'verifikasi_berhasil') {
+                                  $canRequestChange = true;
+                              }
                           } elseif ($currentUser->role === 'admin_desa' && $participant->user && $participant->user->desa_id === $currentUser->desa_id) {
                               $canVerify = true;
                               $canReject = true;
                               // Operator dapat mengedit peserta sebelum verifikasi berhasil
                               if ($participant->status_verifikasi !== 'verifikasi_berhasil') {
                                   $canEdit = true;
+                                  // Admin desa dapat meminta perubahan sebelum verifikasi berhasil
+                                  $canRequestChange = true;
                               }
                           }
                           // Peserta dapat mengunggah berkas sendiri jika belum verifikasi atau verifikasi gagal
                           if ($currentUser->role === 'peserta' && $participant->user && $participant->user->id === $currentUser->id) {
                               if (in_array($participant->status_verifikasi, ['belum_verifikasi', 'verifikasi_gagal'])) {
                                   $canUpload = true;
+                                  // Peserta mengirim permintaan perubahan kepada admin
                                   $canRequestChange = true;
                               }
                           }
@@ -221,7 +239,7 @@
                         @if($canUpload)
                           <a href="{{ route('event-participant.upload.form', $participant->id) }}" class="btn btn-primary btn-sm mb-1">Upload Berkas</a>
                         @endif
-                        {{-- Peserta dapat meminta perubahan data jika belum diverifikasi --}}
+                        {{-- Peserta atau admin dapat meminta perubahan data jika diizinkan --}}
                         @if($canRequestChange)
                           <a href="{{ route('event-participant.request-change.form', $participant->id) }}" class="btn btn-warning btn-sm mb-1">Minta Perubahan</a>
                         @endif
@@ -263,68 +281,76 @@
         </div>
       </div>
     @else
-      <!-- Daftar event dengan filter tahun -->
-      <div class="row mb-3">
-        <div class="col-12 d-flex justify-content-between align-items-center">
-          <h4>Daftar Event</h4>
-          @if(auth()->user()->role === 'administrator')
-            <a href="{{ route('event.create') }}" class="btn btn-primary">Buat Event Baru</a>
-          @endif
+      <!-- Daftar event atau pesan untuk peserta -->
+      @php $u = auth()->user(); @endphp
+      @if($u && $u->role === 'peserta')
+        <!-- Jika pengguna adalah peserta dan tidak memiliki event terpilih,
+             tampilkan pesan bahwa tidak ada event aktif yang diikuti -->
+        <div class="alert alert-info">Anda belum terdaftar pada event aktif mana pun.</div>
+      @else
+        <!-- Daftar event dengan filter tahun -->
+        <div class="row mb-3">
+          <div class="col-12 d-flex justify-content-between align-items-center">
+            <h4>Daftar Event</h4>
+            @if(auth()->user()->role === 'administrator')
+              <a href="{{ route('event.create') }}" class="btn btn-primary">Buat Event Baru</a>
+            @endif
+          </div>
         </div>
-      </div>
-      <div class="row mb-3">
-        <div class="col-12 col-md-4">
-          <form method="GET" action="{{ route('home') }}">
-            <div class="form-group">
-              <label for="year">Filter Tahun</label>
-              <select name="year" id="year" class="form-control" onchange="this.form.submit()">
-                <option value="">Semua Tahun</option>
-                @foreach($years as $yr)
-                  <option value="{{ $yr }}" {{ (isset($year) && $year == $yr) ? 'selected' : '' }}>{{ $yr }}</option>
-                @endforeach
-              </select>
-            </div>
-          </form>
+        <div class="row mb-3">
+          <div class="col-12 col-md-4">
+            <form method="GET" action="{{ route('home') }}">
+              <div class="form-group">
+                <label for="year">Filter Tahun</label>
+                <select name="year" id="year" class="form-control" onchange="this.form.submit()">
+                  <option value="">Semua Tahun</option>
+                  @foreach($years as $yr)
+                    <option value="{{ $yr }}" {{ (isset($year) && $year == $yr) ? 'selected' : '' }}>{{ $yr }}</option>
+                  @endforeach
+                </select>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
-      <div class="row">
-        @forelse($filteredEvents as $event)
-          <div class="col-md-4 col-sm-6 mb-3">
-            <div class="card border-{{ $event->statusClass() }}">
-              <div class="card-body">
-                <h5 class="card-title">{{ $event->nama_kegiatan_aktif }}</h5>
-                <p class="mb-1"><small class="text-muted">Pendaftaran:</small></p>
-                <p class="mb-2">
-                  <small>
-                    {{ optional($event->pendaftaran_mulai)->translatedFormat('d M Y H:i') ?? '-' }}
-                    &ndash;
-                    {{ optional($event->pendaftaran_selesai)->translatedFormat('d M Y H:i') ?? '-' }}
-                  </small>
-                </p>
-                <p class="mb-2">Status: <span class="badge badge-{{ $event->statusClass() }}">{{ $event->status() }}</span></p>
-                @php
-                  $role = auth()->user()->role;
-                  $status = $event->status();
-                  $btnLabel = 'Kelola Event';
-                  if ($role !== 'administrator') {
-                      // Untuk operator desa dan peserta: label bergantung pada status event
-                      if ($status === 'Aktif') {
-                          $btnLabel = 'Masuk Event';
-                      } else {
-                          $btnLabel = 'Lihat Event';
-                      }
-                  }
-                @endphp
-                <a href="{{ route('home.event', $event->slug) }}" class="btn btn-primary btn-sm">{{ $btnLabel }}</a>
+        <div class="row">
+          @forelse($filteredEvents as $event)
+            <div class="col-md-4 col-sm-6 mb-3">
+              <div class="card border-{{ $event->statusClass() }}">
+                <div class="card-body">
+                  <h5 class="card-title">{{ $event->nama_kegiatan_aktif }}</h5>
+                  <p class="mb-1"><small class="text-muted">Pendaftaran:</small></p>
+                  <p class="mb-2">
+                    <small>
+                      {{ optional($event->pendaftaran_mulai)->translatedFormat('d M Y H:i') ?? '-' }}
+                      &ndash;
+                      {{ optional($event->pendaftaran_selesai)->translatedFormat('d M Y H:i') ?? '-' }}
+                    </small>
+                  </p>
+                  <p class="mb-2">Status: <span class="badge badge-{{ $event->statusClass() }}">{{ $event->status() }}</span></p>
+                  @php
+                    $role = auth()->user()->role;
+                    $status = $event->status();
+                    $btnLabel = 'Kelola Event';
+                    if ($role !== 'administrator') {
+                        // Untuk operator desa dan peserta: label bergantung pada status event
+                        if ($status === 'Aktif') {
+                            $btnLabel = 'Masuk Event';
+                        } else {
+                            $btnLabel = 'Lihat Event';
+                        }
+                    }
+                  @endphp
+                  <a href="{{ route('home.event', $event->slug) }}" class="btn btn-primary btn-sm">{{ $btnLabel }}</a>
+                </div>
               </div>
             </div>
-          </div>
-        @empty
-          <div class="col-12">
-            <p class="text-muted">Belum ada event untuk tahun ini.</p>
-          </div>
-        @endforelse
-      </div>
+          @empty
+            <div class="col-12">
+              <p class="text-muted">Belum ada event untuk tahun ini.</p>
+            </div>
+          @endforelse
+        </div>
+      @endif
     @endif
   </div>
 </section>

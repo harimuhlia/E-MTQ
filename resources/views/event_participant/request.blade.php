@@ -23,7 +23,12 @@
           <form action="{{ route('event-participant.request-change', $participant->id) }}" method="POST">
             @csrf
             <div class="card-body">
-              <p>Silakan jelaskan perubahan data yang Anda perlukan. Permintaan ini hanya dapat diajukan sebelum verifikasi final.</p>
+              @php $current = auth()->user(); @endphp
+              @if($current && $current->role === 'peserta')
+                <p>Silakan jelaskan perubahan data yang Anda perlukan. Permintaan ini hanya dapat diajukan sebelum verifikasi final.</p>
+              @elseif($current && $current->role === 'admin_desa')
+                <p>Silakan isi pesan untuk peserta mengenai perubahan data atau berkas yang diperlukan sebelum verifikasi final.</p>
+              @endif
               <div class="form-group">
                 <label for="message">Pesan Permintaan</label>
                 <textarea name="message" class="form-control" rows="4" required>{{ old('message', $participant->request_message) }}</textarea>

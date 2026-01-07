@@ -41,4 +41,20 @@ class Cabang extends Model
     {
         return $this->hasMany(Golongan::class);
     }
+
+    /**
+     * Alias relationship to golongans.
+     *
+     * Be consistent with older references to `golongan` in views and controllers.  This
+     * method simply forwards to the `golongans()` relationship.  Without this
+     * alias, calls such as `$cabang->golongan` would throw an exception for an
+     * undefined relationship.  See issue where selecting lomba produced
+     * "Call to undefined relationship [golongan] on model [App\\Models\\Cabang]".
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function golongan()
+    {
+        return $this->golongans();
+    }
 }

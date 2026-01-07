@@ -53,12 +53,27 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('role:administrator,admin_desa')->group(function () {
         // Endpoint untuk mendapatkan golongan berdasarkan cabang
         Route::get('/get-golongan/{cabang_id}', [GolonganController::class, 'getGolonganByCabang']);
-        // Event participants verification & upload
-        Route::get('/event-participant/{participant}/upload', [EventParticipantController::class, 'uploadForm'])->name('event-participant.upload.form');
-        Route::post('/event-participant/{participant}/upload', [EventParticipantController::class, 'upload'])->name('event-participant.upload');
+        // Event participants verification. Rute upload berkas oleh peserta dipindahkan ke luar middleware peran
+        // sehingga role 'peserta' dapat mengaksesnya tanpa terkena 403. Verifikasi dan penolakan
+        // tetap dibatasi ke administrator dan admin desa.
         Route::post('/event-participant/{participant}/verify', [EventParticipantController::class, 'verify'])->name('event-participant.verify');
         Route::post('/event-participant/{participant}/reject', [EventParticipantController::class, 'reject'])->name('event-participant.reject');
+
+        // Halaman form verifikasi peserta. Admin desa dan administrator dapat melihat
+        // detail berkas peserta dan mengambil tindakan verifikasi atau penolakan.
+        Route::get('/event-participant/{participant}/verify-form', [EventParticipantController::class, 'verifyForm'])->name('event-participant.verify-form');
+
+        // Halaman pemilihan lomba untuk peserta. Hanya administrator dan admin desa yang dapat
+        // mengakses rute ini. Peserta dapat dipilih ke lebih dari satu cabang/golongan lomba.
+        Route::get('/peserta/{peserta}/lomba', [PesertaController::class, 'selectLombaForm'])->name('peserta.select-lomba');
+        Route::post('/peserta/{peserta}/lomba', [PesertaController::class, 'selectLomba'])->name('peserta.assign-lomba');
     });
+
+    // Rute upload berkas verifikasi oleh peserta. Diletakkan di luar middleware role
+    // sehingga peserta (role 'peserta') dapat mengakses tanpa terblokir 403. Hak akses
+    // lebih lanjut diperiksa di EventParticipantController.
+    Route::get('/event-participant/{participant}/upload', [EventParticipantController::class, 'uploadForm'])->name('event-participant.upload.form');
+    Route::post('/event-participant/{participant}/upload', [EventParticipantController::class, 'upload'])->name('event-participant.upload');
 
     // Pendaftaran peserta: batasi akses melalui controller, tidak melalui middleware peran
     // Create, store, edit, update, dan delete peserta hanya boleh diakses oleh administrator

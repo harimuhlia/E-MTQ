@@ -59,22 +59,11 @@
                 </select>
               </div>
               @endif
-              <div class="form-group">
-                <label for="cabang_id">Cabang Lomba</label>
-                <select name="cabang_id" id="cabang_id" class="form-control" required>
-                  <option value="">Pilih Cabang</option>
-                  @foreach($cabangs as $cabang)
-                    <option value="{{ $cabang->id }}" {{ old('cabang_id') == $cabang->id ? 'selected' : '' }}>{{ $cabang->nama }}</option>
-                  @endforeach
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="golongan_id">Golongan</label>
-                <select name="golongan_id" id="golongan_id" class="form-control" required>
-                  <option value="">Pilih Golongan</option>
-                  <!-- Opsi golongan akan diisi secara dinamis melalui JavaScript -->
-                </select>
-              </div>
+              <!-- Pemilihan cabang dan golongan telah dipisahkan ke halaman khusus.
+                   Setelah peserta disimpan, admin desa atau superadmin dapat menempatkan
+                   peserta ke satu atau lebih cabang/golongan melalui halaman pemilihan
+                   lomba. Oleh karena itu, form pendaftaran peserta tidak lagi
+                   menampilkan dropdown cabang dan golongan di sini. -->
             </div>
             <div class="card-footer">
               <button type="submit" class="btn btn-primary">Simpan</button>
@@ -89,35 +78,6 @@
 @endsection
 
 @section('javascript')
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const cabangSelect = document.getElementById('cabang_id');
-    const golonganSelect = document.getElementById('golongan_id');
-    function loadGolongan(cabangId) {
-      if (!cabangId) {
-        golonganSelect.innerHTML = '<option value="">Pilih Golongan</option>';
-        return;
-      }
-      fetch('/get-golongan/' + cabangId)
-        .then(response => response.json())
-        .then(data => {
-          golonganSelect.innerHTML = '<option value="">Pilih Golongan</option>';
-          data.forEach(function(item) {
-            const opt = document.createElement('option');
-            opt.value = item.id;
-            opt.textContent = item.nama;
-            if ({{ json_encode(old('golongan_id')) }} == item.id) {
-              opt.selected = true;
-            }
-            golonganSelect.appendChild(opt);
-          });
-        });
-    }
-    // Inisialisasi jika cabang telah dipilih saat submit sebelumnya
-    loadGolongan(cabangSelect.value);
-    cabangSelect.addEventListener('change', function() {
-      loadGolongan(this.value);
-    });
-  });
-</script>
+<!-- Tidak ada JavaScript khusus diperlukan di halaman pendaftaran peserta karena
+     pemilihan cabang dan golongan dilakukan di halaman terpisah. -->
 @endsection

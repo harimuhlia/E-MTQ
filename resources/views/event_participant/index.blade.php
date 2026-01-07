@@ -32,6 +32,7 @@
               <th>Golongan</th>
               <th>Status Verifikasi</th>
               <th>Permintaan Data</th>
+              <th>Alasan Penolakan</th>
               <th>Aksi</th>
             </tr>
           </thead>
@@ -65,6 +66,10 @@
                   {{ $participant->request_message ?? '—' }}
                 </td>
                 <td>
+                  {{-- Tampilkan alasan penolakan jika ada --}}
+                  {{ $participant->catatan_verifikasi ?? '—' }}
+                </td>
+                <td>
                   @php
                     // Tentukan hak aksi berdasarkan peran dan asal desa
                     $canVerify = false;
@@ -76,17 +81,24 @@
                         $canVerify = true;
                         $canReject = true;
                         $canEdit = true;
+                        // Administrator dapat meminta perubahan untuk peserta sebelum verifikasi berhasil
+                        if ($participant->status_verifikasi !== 'verifikasi_berhasil') {
+                            $canRequestChange = true;
+                        }
                     } elseif ($currentUser->role === 'admin_desa' && $participant->user && $participant->user->desa_id === $currentUser->desa_id) {
                         $canVerify = true;
                         $canReject = true;
                         if ($participant->status_verifikasi !== 'verifikasi_berhasil') {
                             $canEdit = true;
+                            // Admin desa dapat meminta perubahan selama belum verifikasi berhasil
+                            $canRequestChange = true;
                         }
                     }
                     // Peserta dapat mengunggah berkas sendiri jika belum verifikasi atau verifikasi gagal
                     if ($currentUser->role === 'peserta' && $participant->user && $participant->user->id === $currentUser->id) {
                         if (in_array($participant->status_verifikasi, ['belum_verifikasi', 'verifikasi_gagal'])) {
                             $canUpload = true;
+                            // Peserta mengirim permintaan perubahan kepada admin
                             $canRequestChange = true;
                         }
                     }
@@ -97,6 +109,22 @@
                         $canEdit = false;
                         $canVerify = false;
                         $canReject = false;
+                    }
+
+                    // Tentukan apakah link menuju halaman verifikasi detail harus ditampilkan.
+                    // Link ini hanya muncul jika status verifikasi belum berhasil. Administrator
+                    // selalu dapat mengakses, sedangkan operator desa hanya boleh mengakses
+                    // peserta dari desanya sendiri dan ketika event masih aktif.
+                    $canShowVerifyForm = false;
+                    if ($participant->status_verifikasi !== 'verifikasi_berhasil') {
+                        if ($currentUser->role === 'administrator') {
+                            $canShowVerifyForm = true;
+                        } elseif ($currentUser->role === 'admin_desa' && $participant->user && $participant->user->desa_id === $currentUser->desa_id) {
+                            // event harus aktif untuk operator desa
+                            if (!isset($selectedEventStatus) || $selectedEventStatus === 'Aktif') {
+                                $canShowVerifyForm = true;
+                            }
+                        }
                     }
                   @endphp
                   {{-- Tampilkan tombol upload berkas untuk peserta --}}
@@ -130,6 +158,11 @@
                   {{-- Jika tidak ada tindakan tersedia, tampilkan strip --}}
                   @if(! $canUpload && ! $canRequestChange && ! $canEdit && $participant->status_verifikasi !== 'sedang_diverifikasi')
                     &mdash;
+                  @endif
+
+                  {{-- Tampilkan link menuju halaman verifikasi detail jika diizinkan --}}
+                  @if($canShowVerifyForm)
+                    <a href="{{ route('event-participant.verify-form', $participant->id) }}" class="btn btn-secondary btn-sm mb-1">Verifikasi</a>
                   @endif
                 </td>
               </tr>

@@ -127,6 +127,24 @@
                     <p>List Peserta</p>
                   </a>
                 </li>
+
+                {{--
+                    Navigasi menuju halaman pemilihan lomba. Link ini mengarahkan ke daftar
+                    peserta, di mana admin desa atau administrator dapat memilih cabang/golongan
+                    untuk setiap peserta melalui tombol "Pilih Lomba" di tabel. Hanya
+                    ditampilkan jika sebuah event telah dipilih. Operator desa hanya dapat
+                    mengaksesnya ketika status event aktif.
+                --}}
+                @if(session('selected_event_id'))
+                  @if($role === 'administrator' || ($role === 'admin_desa' && $selectedEventStatus === 'Aktif'))
+                  <li class="nav-item">
+                    <a href="{{ route('peserta.index') }}" class="nav-link {{ request()->is('peserta/*/lomba*') ? 'active' : '' }}">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>Pilih Lomba</p>
+                    </a>
+                  </li>
+                  @endif
+                @endif
                 @endif
               </ul>
             </li>

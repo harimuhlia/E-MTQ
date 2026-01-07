@@ -164,19 +164,39 @@ class EventParticipantController extends Controller
     {
         $participant = EventParticipant::with('user')->findOrFail($id);
         $currentUser = auth()->user();
-        // Only the participant themself may request a change
-        if ($currentUser->role !== 'peserta' || $participant->user_id !== $currentUser->id) {
-            abort(403);
+        // Peserta dapat mengajukan permintaan perubahan untuk dirinya sendiri
+        if ($currentUser->role === 'peserta') {
+            if ($participant->user_id !== $currentUser->id) {
+                abort(403);
+            }
+            // Hanya boleh meminta perubahan jika event aktif
+            if ($participant->detailEvent && $participant->detailEvent->status() !== 'Aktif') {
+                return redirect()->route('home')->with('error', 'Event ini tidak sedang berlangsung, permintaan perubahan tidak dapat diajukan.');
+            }
+            // Tidak boleh lagi meminta perubahan jika sudah diverifikasi berhasil
+            if ($participant->status_verifikasi === 'verifikasi_berhasil') {
+                return redirect()->back()->with('error', 'Data sudah diverifikasi, permintaan perubahan tidak dapat diajukan.');
+            }
+            return view('event_participant.request', compact('participant'));
         }
-        // Cek status event: peserta hanya dapat meminta perubahan ketika event aktif
-        if ($participant->detailEvent && $participant->detailEvent->status() !== 'Aktif') {
-            return redirect()->route('home')->with('error', 'Event ini tidak sedang berlangsung, permintaan perubahan tidak dapat diajukan.');
+        // Admin desa dapat meminta peserta untuk memperbaiki data/berkas sebelum verifikasi final
+        if ($currentUser->role === 'admin_desa') {
+            // Pastikan peserta berasal dari desa yang sama
+            if (! $participant->user || $participant->user->desa_id !== $currentUser->desa_id) {
+                abort(403);
+            }
+            // Event harus aktif untuk operator desa
+            if ($participant->detailEvent && $participant->detailEvent->status() !== 'Aktif') {
+                return redirect()->route('home')->with('error', 'Event ini tidak sedang berlangsung, permintaan perubahan tidak dapat diajukan.');
+            }
+            // Tidak boleh meminta perubahan jika peserta sudah diverifikasi berhasil
+            if ($participant->status_verifikasi === 'verifikasi_berhasil') {
+                return redirect()->back()->with('error', 'Data sudah diverifikasi, permintaan perubahan tidak dapat diajukan.');
+            }
+            return view('event_participant.request', compact('participant'));
         }
-        // Request is not allowed once verification is successful
-        if ($participant->status_verifikasi === 'verifikasi_berhasil') {
-            return redirect()->back()->with('error', 'Data sudah diverifikasi, permintaan perubahan tidak dapat diajukan.');
-        }
-        return view('event_participant.request', compact('participant'));
+        // Other roles are not allowed
+        abort(403);
     }
 
     /**
@@ -190,22 +210,49 @@ class EventParticipantController extends Controller
     {
         $participant = EventParticipant::with('user')->findOrFail($id);
         $currentUser = auth()->user();
-        if ($currentUser->role !== 'peserta' || $participant->user_id !== $currentUser->id) {
-            abort(403);
+        // Peserta mengajukan permintaan perubahan untuk dirinya sendiri
+        if ($currentUser->role === 'peserta') {
+            if ($participant->user_id !== $currentUser->id) {
+                abort(403);
+            }
+            // Hanya boleh meminta perubahan jika event aktif
+            if ($participant->detailEvent && $participant->detailEvent->status() !== 'Aktif') {
+                return redirect()->route('home')->with('error', 'Event ini tidak sedang berlangsung, permintaan perubahan tidak dapat diajukan.');
+            }
+            if ($participant->status_verifikasi === 'verifikasi_berhasil') {
+                return redirect()->back()->with('error', 'Data sudah diverifikasi, permintaan perubahan tidak dapat diajukan.');
+            }
+            $validated = $request->validate([
+                'message' => 'required|string',
+            ]);
+            $participant->request_message = $validated['message'];
+            $participant->save();
+            return redirect()->route('home')->with('success', 'Permintaan perbaikan data telah dikirim.');
         }
-        // Cek status event: peserta hanya dapat meminta perubahan ketika event aktif
-        if ($participant->detailEvent && $participant->detailEvent->status() !== 'Aktif') {
-            return redirect()->route('home')->with('error', 'Event ini tidak sedang berlangsung, permintaan perubahan tidak dapat diajukan.');
+        // Admin desa meminta peserta untuk memperbaiki data/berkas
+        if ($currentUser->role === 'admin_desa') {
+            // Pastikan peserta berasal dari desa yang sama
+            if (! $participant->user || $participant->user->desa_id !== $currentUser->desa_id) {
+                abort(403);
+            }
+            // Event harus aktif untuk operator desa
+            if ($participant->detailEvent && $participant->detailEvent->status() !== 'Aktif') {
+                return redirect()->route('home')->with('error', 'Event ini tidak sedang berlangsung, permintaan perubahan tidak dapat diajukan.');
+            }
+            // Hanya boleh meminta perubahan jika belum diverifikasi berhasil
+            if ($participant->status_verifikasi === 'verifikasi_berhasil') {
+                return redirect()->back()->with('error', 'Data sudah diverifikasi, permintaan perubahan tidak dapat diajukan.');
+            }
+            $validated = $request->validate([
+                'message' => 'required|string',
+            ]);
+            // Simpan pesan permintaan perubahan di kolom request_message
+            $participant->request_message = $validated['message'];
+            $participant->save();
+            return redirect()->route('event-participant.index')->with('success', 'Permintaan perubahan data telah dikirim ke peserta.');
         }
-        if ($participant->status_verifikasi === 'verifikasi_berhasil') {
-            return redirect()->back()->with('error', 'Data sudah diverifikasi, permintaan perubahan tidak dapat diajukan.');
-        }
-        $validated = $request->validate([
-            'message' => 'required|string',
-        ]);
-        $participant->request_message = $validated['message'];
-        $participant->save();
-        return redirect()->route('home')->with('success', 'Permintaan perbaikan data telah dikirim.');
+        // Other roles
+        abort(403);
     }
 
     /**
@@ -278,5 +325,41 @@ class EventParticipantController extends Controller
         $participant->catatan_verifikasi = $request->reason;
         $participant->save();
         return redirect()->back()->with('success', 'Berkas peserta ditolak.');
+    }
+
+    /**
+     * Tampilkan halaman verifikasi peserta untuk admin dan operator desa.
+     *
+     * Halaman ini menampilkan data peserta, dokumen yang diunggah, serta tombol
+     * untuk memverifikasi atau menolak. Hanya administrator dan admin desa
+     * (pemilik desa) yang dapat mengakses halaman ini.
+     *
+     * @param int $id ID event_participant
+     * @return \Illuminate\Contracts\Support\Renderable|\Illuminate\Http\RedirectResponse
+     */
+    public function verifyForm($id)
+    {
+        $currentUser = auth()->user();
+        $participant = EventParticipant::with(['user.desa', 'cabang', 'golongan', 'detailEvent'])->findOrFail($id);
+        // Cek hak akses: hanya administrator atau operator desa pemilik desa
+        $allowed = false;
+        if ($currentUser->role === 'administrator') {
+            $allowed = true;
+        } elseif ($currentUser->role === 'admin_desa' && $participant->user && $participant->user->desa_id === $currentUser->desa_id) {
+            $allowed = true;
+        }
+        if (! $allowed) {
+            abort(403);
+        }
+        // Cek status event untuk operator desa: hanya bisa memproses saat event aktif
+        if ($currentUser->role !== 'administrator' && $participant->detailEvent && $participant->detailEvent->status() !== 'Aktif') {
+            return redirect()->route('event-participant.index')->with('error', 'Event ini tidak sedang berlangsung, verifikasi tidak diizinkan.');
+        }
+        // Tampilkan halaman verifikasi. Halaman ini menyediakan tombol verifikasi (POST)
+        // dan penolakan (POST) yang diarahkan ke route event-participant.verify dan event-participant.reject.
+        return view('event_participant.verify', [
+            'participant' => $participant,
+            'currentUser' => $currentUser,
+        ]);
     }
 }
