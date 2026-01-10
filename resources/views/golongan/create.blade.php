@@ -38,8 +38,12 @@
             <input type="text" class="form-control" name="nama" id="nama_golongan" placeholder="Silakan Masukan Nama Golongan">
         </div>
         <div class="form-group">
-            <label for="max_usia">Usia Maksimal (tahun)</label>
-            <input type="number" class="form-control" name="max_usia" id="max_usia" placeholder="Contoh: 18" min="0">
+            <label for="usia_min">Usia Minimal (tahun)</label>
+            <input type="number" class="form-control" name="usia_min" id="usia_min" placeholder="Contoh: 15" min="0">
+        </div>
+        <div class="form-group">
+            <label for="usia_max">Usia Maksimal (tahun)</label>
+            <input type="number" class="form-control" name="usia_max" id="usia_max" placeholder="Contoh: 18" min="0">
         </div>
     <div class="card-footer">
     <button type="submit" class="btn btn-primary">Submit</button>

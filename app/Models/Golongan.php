@@ -15,6 +15,9 @@ class Golongan extends Model
         'nama',
         'cabang_id',
         'max_usia',
+        // Batas usia minimal dan maksimal dalam satuan tahun. Nullable.
+        'usia_min',
+        'usia_max',
     ];
 
     /**

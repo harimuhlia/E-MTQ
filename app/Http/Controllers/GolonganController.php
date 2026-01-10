@@ -41,13 +41,18 @@ class GolonganController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'cabang_id' => 'required|exists:cabangs,id',
-            'max_usia' => 'nullable|integer|min:0',
+            // usia_min dan usia_max dalam tahun, keduanya opsional namun usia_max tidak boleh kurang dari usia_min
+            'usia_min' => 'nullable|integer|min:0',
+            'usia_max' => 'nullable|integer|min:0|gte:usia_min',
         ]);
 
         Golongan::create([
             'nama' => $request->nama,
             'cabang_id' => $request->cabang_id,
-            'max_usia' => $request->max_usia,
+            // Simpan usia_min dan usia_max. max_usia tetap diisi untuk kompatibilitas lama
+            'usia_min' => $request->usia_min,
+            'usia_max' => $request->usia_max,
+            'max_usia' => $request->usia_max,
         ]);
 
         return redirect()->route('golongan.index')->with('success', 'Golongan berhasil ditambahkan');
@@ -74,13 +79,17 @@ class GolonganController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'cabang_id' => 'required|exists:cabangs,id',
-            'max_usia' => 'nullable|integer|min:0',
+            'usia_min' => 'nullable|integer|min:0',
+            'usia_max' => 'nullable|integer|min:0|gte:usia_min',
         ]);
 
         $golongan->update([
             'nama' => $request->nama,
             'cabang_id' => $request->cabang_id,
-            'max_usia' => $request->max_usia,
+            'usia_min' => $request->usia_min,
+            'usia_max' => $request->usia_max,
+            // Update juga max_usia agar aplikasi lama tetap kompatibel
+            'max_usia' => $request->usia_max,
         ]);
 
         return redirect()->route('golongan.index')->with('success', 'Golongan berhasil diupdate');

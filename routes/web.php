@@ -62,12 +62,17 @@ Route::middleware(['auth'])->group(function () {
         // Halaman form verifikasi peserta. Admin desa dan administrator dapat melihat
         // detail berkas peserta dan mengambil tindakan verifikasi atau penolakan.
         Route::get('/event-participant/{participant}/verify-form', [EventParticipantController::class, 'verifyForm'])->name('event-participant.verify-form');
-
-        // Halaman pemilihan lomba untuk peserta. Hanya administrator dan admin desa yang dapat
-        // mengakses rute ini. Peserta dapat dipilih ke lebih dari satu cabang/golongan lomba.
-        Route::get('/peserta/{peserta}/lomba', [PesertaController::class, 'selectLombaForm'])->name('peserta.select-lomba');
-        Route::post('/peserta/{peserta}/lomba', [PesertaController::class, 'selectLomba'])->name('peserta.assign-lomba');
     });
+
+    // ----------------------------------------------------------
+    // Halaman pemilihan lomba untuk peserta
+    //
+    // Rute ini diletakkan di luar middleware role khusus sehingga tidak terblokir
+    // oleh RoleMiddleware, tetapi hak akses tetap dikendalikan di dalam
+    // PesertaController (hanya administrator dan admin desa yang diperbolehkan).
+    // Peserta dapat dipilih ke lebih dari satu cabang/golongan lomba.
+    Route::get('/peserta/{peserta}/lomba', [PesertaController::class, 'selectLombaForm'])->name('peserta.select-lomba');
+    Route::post('/peserta/{peserta}/lomba', [PesertaController::class, 'selectLomba'])->name('peserta.assign-lomba');
 
     // Rute upload berkas verifikasi oleh peserta. Diletakkan di luar middleware role
     // sehingga peserta (role 'peserta') dapat mengakses tanpa terblokir 403. Hak akses

@@ -8,13 +8,30 @@
     <!-- Sidebar -->
     <div class="sidebar">
       <!-- Sidebar user panel (optional) -->
+      @php
+        // Ambil data user yang sedang login untuk menampilkan panel dinamis
+        /** @var \App\Models\User|null $currentSidebarUser */
+        $currentSidebarUser = auth()->user();
+        $userName = $currentSidebarUser ? $currentSidebarUser->name : 'Pengguna';
+        // Map peran ke label yang lebih ramah pengguna
+        $roleLabels = [
+            'administrator' => 'Administrator',
+            'admin_desa'    => 'Admin Desa',
+            'peserta'       => 'Peserta',
+        ];
+        $userRoleKey = $currentSidebarUser ? $currentSidebarUser->role : null;
+        $userRoleLabel = $roleLabels[$userRoleKey] ?? ucfirst($userRoleKey ?? '');
+      @endphp
       <div class="user-panel mt-3 pb-3 mb-3 d-flex">
         <div class="image">
-          <img src="{{ asset('AdminLTE') }}/dist/img/avatar5.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8" class="img-circle elevation-2" alt="Foto Profil">
+          {{-- Gunakan avatar default dari AdminLTE untuk sementara. Jika fitur foto profil tersedia, ganti di sini. --}}
+          <img src="{{ asset('AdminLTE') }}/dist/img/avatar5.png" alt="Foto Profil" class="brand-image img-circle elevation-3" style="opacity: .8">
         </div>
         <div class="info">
-          <a href="#" class="d-block">Camat Rajeg</a>
-          <span class="text-success"><i class="fas fa-circle nav-icon"></i> Administrator</span>
+          <a href="#" class="d-block">{{ $userName }}</a>
+          @if($userRoleLabel)
+            <span class="text-success"><i class="fas fa-circle nav-icon"></i> {{ $userRoleLabel }}</span>
+          @endif
         </div>
       </div>
   

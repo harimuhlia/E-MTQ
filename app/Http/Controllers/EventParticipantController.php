@@ -83,11 +83,28 @@ class EventParticipantController extends Controller
     {
         $participant = EventParticipant::with('user')->findOrFail($id);
         $currentUser = auth()->user();
-        // Pastikan hanya peserta pemilik yang boleh mengunggah berkasnya
-        if ($currentUser->role !== 'peserta' || $participant->user_id !== $currentUser->id) {
+        // Tentukan apakah user berhak untuk mengunggah berkas untuk peserta ini.
+        // Peserta hanya boleh mengunggah berkas dirinya sendiri.
+        // Admin desa boleh mengunggah berkas untuk peserta dari desanya.
+        // Administrator boleh mengunggah berkas siapa saja.
+        $allowed = false;
+        if ($currentUser->role === 'peserta') {
+            // Peserta hanya untuk dirinya sendiri
+            if ($participant->user_id === $currentUser->id) {
+                $allowed = true;
+            }
+        } elseif ($currentUser->role === 'admin_desa') {
+            // Admin desa hanya untuk peserta dari desanya sendiri
+            if ($participant->user && $participant->user->desa_id === $currentUser->desa_id) {
+                $allowed = true;
+            }
+        } elseif ($currentUser->role === 'administrator') {
+            $allowed = true;
+        }
+        if (! $allowed) {
             abort(403);
         }
-        // Cek status event: peserta hanya dapat mengunggah berkas ketika event aktif
+        // Cek status event: pengunggahan hanya diizinkan ketika event aktif
         if ($participant->detailEvent && $participant->detailEvent->status() !== 'Aktif') {
             return redirect()->route('home')->with('error', 'Event ini tidak sedang berlangsung, tidak dapat mengunggah berkas.');
         }
@@ -108,11 +125,23 @@ class EventParticipantController extends Controller
     {
         $participant = EventParticipant::findOrFail($id);
         $currentUser = auth()->user();
-        // Pastikan user adalah peserta tersebut
-        if ($currentUser->role !== 'peserta' || $participant->user_id !== $currentUser->id) {
+        // Tentukan apakah user berhak untuk mengunggah berkas.
+        $allowed = false;
+        if ($currentUser->role === 'peserta') {
+            if ($participant->user_id === $currentUser->id) {
+                $allowed = true;
+            }
+        } elseif ($currentUser->role === 'admin_desa') {
+            if ($participant->user && $participant->user->desa_id === $currentUser->desa_id) {
+                $allowed = true;
+            }
+        } elseif ($currentUser->role === 'administrator') {
+            $allowed = true;
+        }
+        if (! $allowed) {
             abort(403);
         }
-        // Cek status event: peserta hanya dapat mengunggah berkas ketika event aktif
+        // Cek status event: hanya dapat mengunggah ketika event aktif
         if ($participant->detailEvent && $participant->detailEvent->status() !== 'Aktif') {
             return redirect()->route('home')->with('error', 'Event ini tidak sedang berlangsung, tidak dapat mengunggah berkas.');
         }
@@ -123,7 +152,7 @@ class EventParticipantController extends Controller
             'ktp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
-        // Pastikan ada berkas yang diunggah. Peserta harus mengunggah setidaknya satu dokumen atau foto.
+        // Pastikan ada berkas yang diunggah. Harus unggah minimal satu dokumen/foto
         if (!$request->hasFile('kk') && !$request->hasFile('akta') && !$request->hasFile('ktp') && !$request->hasFile('photo')) {
             return redirect()->back()->with('error', 'Anda harus mengunggah setidaknya satu berkas atau foto.');
         }
@@ -265,18 +294,13 @@ class EventParticipantController extends Controller
     {
         $currentUser = auth()->user();
         $participant = EventParticipant::with('user')->findOrFail($id);
-        // Tentukan apakah user memiliki hak verifikasi
-        $allowed = false;
-        if ($currentUser->role === 'administrator') {
-            $allowed = true;
-        } elseif ($currentUser->role === 'admin_desa' && $participant->user && $participant->user->desa_id === $currentUser->desa_id) {
-            $allowed = true;
-        }
-        if (!$allowed) {
+        // Hanya superadmin (administrator) yang dapat memverifikasi.
+        if ($currentUser->role !== 'administrator') {
             abort(403);
         }
-        // Cek status event: operator hanya dapat memverifikasi ketika event aktif
-        if ($currentUser->role !== 'administrator' && $participant->detailEvent && $participant->detailEvent->status() !== 'Aktif') {
+        // Administrator dapat memverifikasi tanpa terikat status event, namun jika event tidak aktif,
+        // tampilkan pesan agar konsisten dengan logika lain.
+        if ($participant->detailEvent && $participant->detailEvent->status() !== 'Aktif') {
             return redirect()->back()->with('error', 'Event ini tidak sedang berlangsung, verifikasi tidak diizinkan.');
         }
         // Hanya dapat diverifikasi jika sedang dalam status sedang_diverifikasi
@@ -300,18 +324,12 @@ class EventParticipantController extends Controller
     {
         $currentUser = auth()->user();
         $participant = EventParticipant::with('user')->findOrFail($id);
-        // Periksa hak menolak: superadmin atau operator desa pemilik
-        $allowed = false;
-        if ($currentUser->role === 'administrator') {
-            $allowed = true;
-        } elseif ($currentUser->role === 'admin_desa' && $participant->user && $participant->user->desa_id === $currentUser->desa_id) {
-            $allowed = true;
-        }
-        if (!$allowed) {
+        // Hanya superadmin (administrator) yang dapat menolak peserta.
+        if ($currentUser->role !== 'administrator') {
             abort(403);
         }
-        // Cek status event: operator hanya dapat menolak ketika event aktif
-        if ($currentUser->role !== 'administrator' && $participant->detailEvent && $participant->detailEvent->status() !== 'Aktif') {
+        // Jika event tidak aktif, tampilkan pesan untuk konsistensi
+        if ($participant->detailEvent && $participant->detailEvent->status() !== 'Aktif') {
             return redirect()->back()->with('error', 'Event ini tidak sedang berlangsung, penolakan tidak diizinkan.');
         }
         // Hanya dapat ditolak jika sedang dalam status sedang_diverifikasi

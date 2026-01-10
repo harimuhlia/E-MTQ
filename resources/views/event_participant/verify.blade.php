@@ -86,16 +86,14 @@
       <div class="card-footer">
         @php
           // Tentukan apakah tombol verifikasi/penolakan dapat ditampilkan
+          // Hanya administrator yang dapat memverifikasi atau menolak.
           $canVerify = false;
           $canReject = false;
           if ($currentUser->role === 'administrator') {
               $canVerify = true;
               $canReject = true;
-          } elseif ($currentUser->role === 'admin_desa' && $participant->user && $participant->user->desa_id === $currentUser->desa_id) {
-              $canVerify = true;
-              $canReject = true;
           }
-          // Non admin tidak boleh menverifikasi jika status event tidak aktif
+          // Non administrator tidak boleh menverifikasi/menolak apapun. Event status juga harus aktif.
           if ($participant->detailEvent && $participant->detailEvent->status() !== 'Aktif' && $currentUser->role !== 'administrator') {
               $canVerify = false;
               $canReject = false;

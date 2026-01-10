@@ -178,12 +178,14 @@ class PesertaController extends Controller
      */
     public function edit(User $peserta)
     {
+        
         $currentUser = auth()->user();
         // Only administrator or admin_desa may edit
         $role = trim(strtolower($currentUser->role));
         if (! in_array($role, ['administrator', 'admin_desa'])) {
             abort(403);
         }
+        die('debug edit peserta');
         // Ensure the user being edited is a participant
         if ($peserta->role !== 'peserta') {
             abort(404);
@@ -221,6 +223,7 @@ class PesertaController extends Controller
         }
         // Pass current user role to view for conditional display
         $currentUserRole = $currentUser->role;
+        
         return view('peserta.edit', compact('peserta', 'eventParticipant', 'desas', 'currentUserRole'));
     }
 
@@ -490,21 +493,18 @@ class PesertaController extends Controller
             if ($exists) {
                 continue; // skip duplicates
             }
-            // Validate age based on ketentuan usia or golongan max_usia
-            $ketentuan = \App\Models\KetentuanUsia::where('cabang_id', $cabangId)
-                ->where('golongan_id', $golonganId)
-                ->first();
-            if ($ketentuan) {
-                $minDate = \Carbon\Carbon::parse($ketentuan->min_usia);
-                $maxDate = \Carbon\Carbon::parse($ketentuan->max_usia);
-                if ($pesertaBirth->lt($minDate) || $pesertaBirth->gt($maxDate)) {
-                    $errors[] = 'Usia peserta tidak memenuhi ketentuan usia untuk cabang dan golongan yang dipilih.';
+            // Ambil informasi golongan untuk validasi usia
+            $gol = \App\Models\Golongan::find($golonganId);
+            if ($gol) {
+                // Validasi usia minimal jika diset (usia_min diisi dengan batas minimal tahun)
+                if (!is_null($gol->usia_min) && $age < $gol->usia_min) {
+                    $errors[] = 'Usia peserta kurang dari batas minimal untuk golongan ' . ($gol->nama ?? '') . '.';
                     continue;
                 }
-            } else {
-                // fallback to golongan max_usia
-                $gol = \App\Models\Golongan::find($golonganId);
-                if ($gol && $gol->max_usia && $age > $gol->max_usia) {
+                // Validasi usia maksimal jika diset (usia_max diisi dengan batas maksimal tahun)
+                // Jika usia_max tidak ada (null), fallback ke max_usia untuk kompatibilitas lama
+                $maxAllowed = $gol->usia_max ?? $gol->max_usia;
+                if (!is_null($maxAllowed) && $age > $maxAllowed) {
                     $errors[] = 'Usia peserta melebihi batas maksimal untuk golongan ' . ($gol->nama ?? '') . '.';
                     continue;
                 }

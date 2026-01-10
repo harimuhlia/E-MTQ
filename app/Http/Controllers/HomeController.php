@@ -117,17 +117,17 @@ class HomeController extends Controller
                     ->with(['user.desa', 'cabang', 'golongan'])
                     ->get();
                 $currentUser = auth()->user();
-                // Filter peserta berdasarkan peran: admin_desa hanya melihat peserta dari desanya, peserta melihat dirinya sendiri
+                // Filter peserta berdasarkan peran:
+                // - Admin desa hanya melihat peserta dari desanya.
+                // - Peserta dapat melihat daftar semua peserta pada event ini (read-only),
+                //   sehingga tidak difilter hanya dirinya sendiri. Aksi yang tersedia
+                //   akan dibatasi di tampilan.
                 if ($currentUser && $currentUser->role === 'admin_desa') {
                     $eventParticipants = $allParticipants->filter(function ($p) use ($currentUser) {
                         return $p->user && $p->user->desa_id === $currentUser->desa_id;
                     });
-                } elseif ($currentUser && $currentUser->role === 'peserta') {
-                    $eventParticipants = $allParticipants->filter(function ($p) use ($currentUser) {
-                        return $p->user_id === $currentUser->id;
-                    });
                 } else {
-                    // administrator sees all participants
+                    // administrator dan peserta melihat seluruh peserta
                     $eventParticipants = $allParticipants;
                 }
                 // Hitung statistik berdasarkan peserta yang dapat dilihat

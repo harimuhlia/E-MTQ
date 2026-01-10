@@ -111,19 +111,21 @@
         </div>
       </div>
 
-      {{-- Pengumuman terbaru untuk event terpilih --}}
+      {{-- Inbox pengumuman untuk event terpilih --}}
       @if(isset($announcements) && $announcements->count())
       <div class="row mt-4">
         <div class="col-md-8">
           <div class="card">
-            <div class="card-header">
-              <h3 class="card-title">Pengumuman Terbaru</h3>
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h3 class="card-title">Inbox Pengumuman</h3>
+              {{-- Link untuk melihat semua pengumuman --}}
+              <a href="{{ route('announcements.index') }}" class="btn btn-link btn-sm">Lihat Semua</a>
             </div>
             <div class="card-body">
               @foreach($announcements as $announcement)
                 <div class="mb-3">
-                  <h5>{{ $announcement->title }}</h5>
-                  <p>{!! \Illuminate\Support\Str::limit(strip_tags($announcement->content), 150) !!}</p>
+                  <h5 class="mb-1">{{ $announcement->title }}</h5>
+                  <p class="mb-1">{!! \Illuminate\Support\Str::limit(strip_tags($announcement->content), 150) !!}</p>
                   <small class="text-muted">{{ $announcement->created_at->format('d M Y H:i') }}</small>
                   @if(!$loop->last)
                   <hr>
@@ -200,33 +202,38 @@
                           $canUpload = false;
                           $canEdit = false;
                           $canRequestChange = false;
+                          // Administrator: semua hak
                           if ($currentUser->role === 'administrator') {
                               $canVerify = true;
                               $canReject = true;
                               $canEdit = true;
-                              // Administrator dapat meminta perubahan sebelum verifikasi berhasil
                               if ($participant->status_verifikasi !== 'verifikasi_berhasil') {
                                   $canRequestChange = true;
                               }
                           } elseif ($currentUser->role === 'admin_desa' && $participant->user && $participant->user->desa_id === $currentUser->desa_id) {
-                              $canVerify = true;
-                              $canReject = true;
-                              // Operator dapat mengedit peserta sebelum verifikasi berhasil
+                              // Admin desa tidak dapat memverifikasi/menolak
+                              // Mereka hanya dapat mengedit peserta dan meminta perubahan sebelum verifikasi berhasil
                               if ($participant->status_verifikasi !== 'verifikasi_berhasil') {
                                   $canEdit = true;
-                                  // Admin desa dapat meminta perubahan sebelum verifikasi berhasil
                                   $canRequestChange = true;
+                              }
+                              // Admin desa dapat mengunggah berkas untuk peserta dari desanya
+                              if ($participant->status_verifikasi !== 'verifikasi_berhasil') {
+                                  $canUpload = true;
                               }
                           }
                           // Peserta dapat mengunggah berkas sendiri jika belum verifikasi atau verifikasi gagal
                           if ($currentUser->role === 'peserta' && $participant->user && $participant->user->id === $currentUser->id) {
                               if (in_array($participant->status_verifikasi, ['belum_verifikasi', 'verifikasi_gagal'])) {
                                   $canUpload = true;
-                                  // Peserta mengirim permintaan perubahan kepada admin
                                   $canRequestChange = true;
                               }
                           }
-                          // Batasi aksi berdasarkan status event: jika bukan Aktif, non-admin tidak dapat melakukan aksi apapun
+                          // Administrator juga dapat mengunggah berkas jika status belum berhasil
+                          if ($currentUser->role === 'administrator' && $participant->status_verifikasi !== 'verifikasi_berhasil') {
+                              $canUpload = true;
+                          }
+                          // Batasi aksi berdasarkan status event: jika bukan Aktif, non-administrator tidak dapat melakukan aksi
                           if (isset($selectedEventStatus) && $selectedEventStatus !== 'Aktif' && $currentUser->role !== 'administrator') {
                               $canUpload = false;
                               $canRequestChange = false;

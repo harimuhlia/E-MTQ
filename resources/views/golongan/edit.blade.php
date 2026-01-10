@@ -38,8 +38,12 @@
             <input type="text" class="form-control" name="nama" value="{{ $golongan->nama }}">
         </div>
         <div class="form-group">
-            <label for="max_usia">Usia Maksimal (tahun)</label>
-            <input type="number" class="form-control" name="max_usia" id="max_usia" value="{{ $golongan->max_usia }}" min="0">
+            <label for="usia_min">Usia Minimal (tahun)</label>
+            <input type="number" class="form-control" name="usia_min" id="usia_min" value="{{ $golongan->usia_min }}" min="0">
+        </div>
+        <div class="form-group">
+            <label for="usia_max">Usia Maksimal (tahun)</label>
+            <input type="number" class="form-control" name="usia_max" id="usia_max" value="{{ $golongan->usia_max }}" min="0">
         </div>
     <div class="card-footer">
     <button type="submit" class="btn btn-primary">Submit</button>
